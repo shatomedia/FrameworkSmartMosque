@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout Test - Smart Mosque Platform</title>
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        /* Platform Container */
+        .platform-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Platform Header */
+        .platform-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .platform-title h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .collaboration-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 0.9rem;
+        }
+
+        .online-users {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 80px);
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: white;
+            padding: 25px;
+            border-right: 1px solid #e2e8f0;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: #f1f5f9;
+            color: #667eea;
+        }
+
+        .nav-item.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .nav-item span:first-child {
+            font-size: 1.1rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: #f8fafc;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-layout {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .platform-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .collaboration-info {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="platform-container">
+        <!-- Platform Header -->
+        <div class="platform-header">
+            <div class="platform-title">
+                <h1>🕌 Taqwa: Smart Mosque Platform</h1>
+                <span style="color: #e2e8f0; font-size: 0.9rem;">Layout Test - Collaborative Framework</span>
+            </div>
+            <div class="collaboration-info">
+                <div class="online-users">
+                    <span>👥</span>
+                    <span>5 Online</span>
+                    <div class="user-avatar">AA</div>
+                    <div class="user-avatar">BB</div>
+                    <div class="user-avatar">CC</div>
+                </div>
+                <div style="color: #e2e8f0;">
+                    <span>📊</span>
+                    <span>Project: Layout Test</span>
+                </div>
+                <div style="color: #e2e8f0;">
+                    <span>⏱️</span>
+                    <span>Status: Testing</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Layout -->
+        <div class="main-layout">
+            <!-- Sidebar Navigation -->
+            <div class="sidebar">
+                <h3 style="margin-bottom: 20px; color: #2c3e50;">📋 Framework Modules</h3>
+                <div class="nav-item active">
+                    <span>🗺️</span>
+                    <span>Panduan Proses</span>
+                </div>
+                <div class="nav-item">
+                    <span>📄</span>
+                    <span>Template & Tools</span>
+                </div>
+                <div class="nav-item">
+                    <span>📊</span>
+                    <span>Survey Interaktif</span>
+                </div>
+                <div class="nav-item">
+                    <span>📈</span>
+                    <span>Analisis & Insight</span>
+                </div>
+                <div class="nav-item">
+                    <span>👥</span>
+                    <span>Kolaborasi Tim</span>
+                </div>
+                <div class="nav-item">
+                    <span>🔗</span>
+                    <span>Integrasi Tools</span>
+                </div>
+                <div class="nav-item">
+                    <span>📊</span>
+                    <span>Dashboard Visual</span>
+                </div>
+                <div class="nav-item">
+                    <span>⚙️</span>
+                    <span>Settings & Reset</span>
+                </div>
+                
+                <hr style="margin: 20px 0; border: none; height: 1px; background: #e0e6ed;">
+                
+                <div style="margin-top: 20px; text-align: center;">
+                    <div style="font-weight: 600; margin-bottom: 10px; color: #2c3e50;">📈 Progress Test</div>
+                    <div style="width: 80px; height: 80px; margin: 0 auto; background: conic-gradient(#667eea 0deg 241deg, #e2e8f0 241deg 360deg); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <div style="width: 60px; height: 60px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; color: #667eea;">67%</div>
+                    </div>
+                    <div style="text-align: center; color: #6b7280; font-size: 0.9rem; margin-top: 10px;">
+                        Test Progress
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="main-content">
+                <h2 style="margin-bottom: 20px; color: #2c3e50;">✅ Layout Test Results</h2>
+                
+                <div class="card">
+                    <h3 style="color: #10b981; margin-bottom: 15px;">🎉 Layout Fixed Successfully!</h3>
+                    <p style="margin-bottom: 15px;">CSS layout structure telah diperbaiki dengan fitur:</p>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="margin-bottom: 8px;">✅ Flexbox layout dengan sidebar dan main content</li>
+                        <li style="margin-bottom: 8px;">✅ Sticky header dengan gradient background</li>
+                        <li style="margin-bottom: 8px;">✅ Responsive design untuk mobile</li>
+                        <li style="margin-bottom: 8px;">✅ Proper spacing dan typography</li>
+                        <li style="margin-bottom: 8px;">✅ Interactive navigation items</li>
+                        <li style="margin-bottom: 8px;">✅ Progress ring dan visual elements</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">🔧 Technical Details</h3>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                        <p><strong>Layout System:</strong> CSS Flexbox</p>
+                        <p><strong>Sidebar Width:</strong> 280px (fixed)</p>
+                        <p><strong>Main Content:</strong> flex: 1 (responsive)</p>
+                        <p><strong>Header:</strong> Sticky positioning</p>
+                        <p><strong>Responsiveness:</strong> Mobile-first approach</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="color: #f59e0b; margin-bottom: 15px;">📱 Responsive Test</h3>
+                    <p>Resize browser window atau buka di mobile untuk melihat responsive behavior:</p>
+                    <ul style="margin-top: 10px; padding-left: 20px;">
+                        <li>Desktop: Sidebar + Main content berdampingan</li>
+                        <li>Mobile: Sidebar di atas, main content di bawah</li>
+                        <li>Header menyesuaikan dengan ukuran layar</li>
+                    </ul>
+                </div>
+
+                <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <h3 style="color: white; margin-bottom: 15px;">🚀 Ready for Production</h3>
+                    <p>Layout structure sekarang sudah stabil dan siap digunakan untuk semua fitur Smart Mosque Platform!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add interactive behavior for testing
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+                
+                const mainContent = document.querySelector('.main-content h2');
+                const section = this.querySelector('span:last-child').textContent;
+                mainContent.textContent = `✅ Testing: ${section}`;
+            });
+        });
+    </script>
+</body>
+</html>

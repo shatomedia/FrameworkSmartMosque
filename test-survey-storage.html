@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Survey Data Storage</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Survey Data Storage</h1>
+    
+    <div>
+        <h3>Test Functions:</h3>
+        <button onclick="testSaveData()">💾 Test Save Data</button>
+        <button onclick="testLoadData()">📊 Test Load Data</button>
+        <button onclick="testExportData()">📥 Test Export</button>
+        <button onclick="clearAllData()">🗑️ Clear All Data</button>
+    </div>
+    
+    <div id="results"></div>
+    
+    <div>
+        <h3>Current Data:</h3>
+        <pre id="dataDisplay" style="background: #f8f9fa; padding: 15px; border-radius: 5px;"></pre>
+    </div>
+
+    <script>
+        function showResult(message, type = 'success') {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${type}`;
+            resultDiv.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            resultsDiv.appendChild(resultDiv);
+            
+            // Update data display
+            updateDataDisplay();
+        }
+
+        function updateDataDisplay() {
+            const surveyData = JSON.parse(localStorage.getItem('mosqueSurveyData') || '[]');
+            document.getElementById('dataDisplay').textContent = JSON.stringify(surveyData, null, 2);
+        }
+
+        function testSaveData() {
+            try {
+                // Create test survey data
+                const testSurvey = {
+                    id: 'test-' + Date.now(),
+                    type: 'kepuasan',
+                    timestamp: new Date().toISOString(),
+                    responses: {
+                        'Bagaimana kepuasan Anda terhadap fasilitas masjid?': 'Sangat Puas',
+                        'Apakah ada saran untuk perbaikan?': 'Perlu penambahan tempat wudhu',
+                        'Rating keseluruhan (1-5)': '5'
+                    },
+                    metadata: {
+                        userAgent: navigator.userAgent,
+                        location: 'Test Location'
+                    }
+                };
+
+                // Save to localStorage
+                let surveyData = JSON.parse(localStorage.getItem('mosqueSurveyData') || '[]');
+                surveyData.push(testSurvey);
+                localStorage.setItem('mosqueSurveyData', JSON.stringify(surveyData));
+
+                // Save to sessionStorage
+                sessionStorage.setItem('mosqueSurveyData', JSON.stringify(surveyData));
+
+                showResult(`✅ Test data berhasil disimpan! Total surveys: ${surveyData.length}`, 'success');
+            } catch (error) {
+                showResult(`❌ Error saving data: ${error.message}`, 'error');
+            }
+        }
+
+        function testLoadData() {
+            try {
+                const surveyData = JSON.parse(localStorage.getItem('mosqueSurveyData') || '[]');
+                const todayCount = surveyData.filter(s => 
+                    new Date(s.timestamp).toDateString() === new Date().toDateString()
+                ).length;
+                
+                showResult(`📊 Data berhasil dimuat! Total: ${surveyData.length}, Hari ini: ${todayCount}`, 'success');
+            } catch (error) {
+                showResult(`❌ Error loading data: ${error.message}`, 'error');
+            }
+        }
+
+        function testExportData() {
+            try {
+                const surveyData = JSON.parse(localStorage.getItem('mosqueSurveyData') || '[]');
+                
+                if (surveyData.length === 0) {
+                    showResult('⚠️ Tidak ada data untuk di-export', 'error');
+                    return;
+                }
+
+                // Create CSV content
+                let csvContent = 'ID,Jenis,Tanggal,Waktu';
+                const allQuestions = [...new Set(surveyData.flatMap(s => Object.keys(s.responses)))];
+                csvContent += ',' + allQuestions.map(q => `"${q}"`).join(',') + '\\n';
+
+                surveyData.forEach(survey => {
+                    const date = new Date(survey.timestamp);
+                    let row = `${survey.id},${survey.type},${date.toLocaleDateString('id-ID')},${date.toLocaleTimeString('id-ID')}`;
+                    
+                    allQuestions.forEach(question => {
+                        const answer = survey.responses[question] || '';
+                        const cleanAnswer = Array.isArray(answer) ? answer.join('; ') : String(answer).replace(/"/g, '""');
+                        row += `,"${cleanAnswer}"`;
+                    });
+                    
+                    csvContent += row + '\\n';
+                });
+
+                // Create and download file
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `test-survey-export-${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                showResult(`📥 Export berhasil! File CSV dengan ${surveyData.length} records telah di-download`, 'success');
+            } catch (error) {
+                showResult(`❌ Error exporting data: ${error.message}`, 'error');
+            }
+        }
+
+        function clearAllData() {
+            if (confirm('⚠️ Hapus semua test data?')) {
+                localStorage.removeItem('mosqueSurveyData');
+                sessionStorage.removeItem('mosqueSurveyData');
+                showResult('🗑️ Semua test data berhasil dihapus', 'success');
+            }
+        }
+
+        // Initialize display
+        updateDataDisplay();
+        showResult('🚀 Test page loaded successfully');
+    </script>
+</body>
+</html>

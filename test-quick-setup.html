@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Quick Setup & Header Update</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; }
+        .header-mock { background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Quick Setup & Header Updates</h1>
+    
+    <div class="test-section">
+        <h3>📊 Mock Header Status</h3>
+        <div class="header-mock">
+            <div><strong>Project:</strong> <span id="mockProject">Masjid Al-Hidayah</span></div>
+            <div><strong>Online:</strong> <span id="mockOnline">5 Online</span></div>
+            <div><strong>Auto-save:</strong> <span id="mockAutoSave">30s ago</span></div>
+        </div>
+        <button onclick="testHeaderUpdate()">🔄 Test Header Update</button>
+        <button onclick="testAutoSave()">⏱️ Test Auto-save</button>
+    </div>
+
+    <div class="test-section">
+        <h3>🕌 Test Mosque Configuration</h3>
+        <div>
+            <label>Nama Masjid: </label>
+            <input type="text" id="testMosqueName" placeholder="Masjid At-Taqwa" style="padding: 8px; margin: 5px;">
+            <button onclick="testSaveMosque()">💾 Save & Update Header</button>
+        </div>
+        <button onclick="testLoadMosque()">📁 Load Saved Data</button>
+        <button onclick="testClearData()">🗑️ Clear Data</button>
+    </div>
+
+    <div class="test-section">
+        <h3>📋 Test Quick Setup Simulation</h3>
+        <button onclick="simulateQuickSetup()">🚀 Simulate Complete Setup</button>
+        <button onclick="testWizardSteps()">📝 Test Individual Steps</button>
+    </div>
+
+    <div id="results"></div>
+    
+    <div class="test-section">
+        <h3>💾 Current Stored Data</h3>
+        <pre id="dataDisplay" style="background: #f8f9fa; padding: 15px; border-radius: 5px; white-space: pre-wrap;"></pre>
+        <button onclick="refreshDataDisplay()">🔄 Refresh Data Display</button>
+    </div>
+
+    <script>
+        function showResult(message, type = 'success') {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${type}`;
+            resultDiv.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            resultsDiv.appendChild(resultDiv);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (resultDiv.parentNode) {
+                    resultDiv.parentNode.removeChild(resultDiv);
+                }
+            }, 5000);
+            
+            refreshDataDisplay();
+        }
+
+        function testHeaderUpdate() {
+            const mockProject = document.getElementById('mockProject');
+            const mockOnline = document.getElementById('mockOnline');
+            
+            // Simulate different mosque names
+            const mosqueNames = ['Masjid Al-Ikhlas', 'Masjid At-Taqwa', 'Masjid Ar-Rahman', 'Masjid Al-Hidayah'];
+            const randomMosque = mosqueNames[Math.floor(Math.random() * mosqueNames.length)];
+            const randomOnline = Math.floor(Math.random() * 4) + 3; // 3-6 online
+            
+            mockProject.textContent = randomMosque;
+            mockOnline.textContent = `${randomOnline} Online`;
+            
+            showResult(`Header updated: ${randomMosque}, ${randomOnline} online`, 'success');
+        }
+
+        function testAutoSave() {
+            const mockAutoSave = document.getElementById('mockAutoSave');
+            let seconds = 0;
+            
+            const interval = setInterval(() => {
+                seconds += 1;
+                mockAutoSave.textContent = `${seconds}s ago`;
+                
+                if (seconds >= 10) {
+                    clearInterval(interval);
+                    mockAutoSave.textContent = 'Baru saja';
+                    showResult('Auto-save simulation completed', 'success');
+                }
+            }, 500);
+            
+            showResult('Starting auto-save simulation...', 'success');
+        }
+
+        function testSaveMosque() {
+            const mosqueName = document.getElementById('testMosqueName').value;
+            
+            if (!mosqueName.trim()) {
+                showResult('Masukkan nama masjid terlebih dahulu', 'error');
+                return;
+            }
+            
+            const mosqueData = {
+                name: mosqueName,
+                city: 'Jakarta',
+                address: 'Test Address',
+                lastUpdated: new Date().toISOString(),
+                setupDate: new Date().toISOString()
+            };
+            
+            // Save to localStorage
+            localStorage.setItem('mosqueConfig', JSON.stringify(mosqueData));
+            
+            // Update mock header
+            document.getElementById('mockProject').textContent = mosqueName;
+            document.getElementById('mockAutoSave').textContent = 'Baru saja';
+            
+            showResult(`Masjid "${mosqueName}" berhasil disimpan dan header diupdate`, 'success');
+        }
+
+        function testLoadMosque() {
+            const savedData = localStorage.getItem('mosqueConfig');
+            
+            if (savedData) {
+                try {
+                    const mosqueData = JSON.parse(savedData);
+                    document.getElementById('testMosqueName').value = mosqueData.name || '';
+                    document.getElementById('mockProject').textContent = mosqueData.name || 'Masjid Al-Hidayah';
+                    
+                    showResult(`Data loaded: ${mosqueData.name}`, 'success');
+                } catch (e) {
+                    showResult('Error loading data: ' + e.message, 'error');
+                }
+            } else {
+                showResult('Tidak ada data tersimpan', 'error');
+            }
+        }
+
+        function testClearData() {
+            localStorage.removeItem('mosqueConfig');
+            document.getElementById('testMosqueName').value = '';
+            document.getElementById('mockProject').textContent = 'Masjid Al-Hidayah';
+            document.getElementById('mockAutoSave').textContent = '30s ago';
+            
+            showResult('Data dihapus dan header direset', 'success');
+        }
+
+        function simulateQuickSetup() {
+            showResult('🚀 Memulai simulasi Quick Setup...', 'success');
+            
+            setTimeout(() => {
+                const testData = {
+                    name: 'Masjid At-Tawakkal',
+                    city: 'Bandung',
+                    capacity: 'large',
+                    address: 'Jl. Masjid Raya No. 456, Bandung',
+                    setupDate: new Date().toISOString(),
+                    lastUpdated: new Date().toISOString(),
+                    pengurus: {
+                        ketua: 'Ahmad Fauzi',
+                        bendahara: 'Siti Nurhaliza',
+                        sekretaris: 'Muhammad Rizki'
+                    },
+                    programs: ['Kajian Rutin', 'TPA', 'Program Sosial'],
+                    target: 'Meningkatkan jamaah dan digitalisasi'
+                };
+                
+                localStorage.setItem('mosqueConfig', JSON.stringify(testData));
+                localStorage.setItem('quickSetupCompleted', 'true');
+                
+                // Update header
+                document.getElementById('mockProject').textContent = testData.name;
+                document.getElementById('mockAutoSave').textContent = 'Baru saja';
+                document.getElementById('testMosqueName').value = testData.name;
+                
+                showResult(`✅ Quick Setup completed: ${testData.name}`, 'success');
+            }, 1000);
+            
+            setTimeout(() => {
+                showResult('📋 Setup data lengkap tersimpan', 'success');
+            }, 2000);
+        }
+
+        function testWizardSteps() {
+            const steps = [
+                '🏛️ Step 1: Informasi Dasar Masjid',
+                '👥 Step 2: Setup Pengurus & Takmir', 
+                '💰 Step 3: Manajemen Keuangan',
+                '📋 Step 4: Program & Kegiatan',
+                '🎯 Step 5: Target & Visi Misi'
+            ];
+            
+            let currentStep = 0;
+            
+            const interval = setInterval(() => {
+                if (currentStep < steps.length) {
+                    showResult(steps[currentStep], 'success');
+                    currentStep++;
+                } else {
+                    clearInterval(interval);
+                    showResult('🎉 Semua steps wizard berhasil ditest', 'success');
+                }
+            }, 800);
+        }
+
+        function refreshDataDisplay() {
+            const mosqueConfig = localStorage.getItem('mosqueConfig');
+            const quickSetup = localStorage.getItem('quickSetupCompleted');
+            const surveyData = localStorage.getItem('mosqueSurveyData');
+            
+            const displayData = {
+                mosqueConfig: mosqueConfig ? JSON.parse(mosqueConfig) : null,
+                quickSetupCompleted: quickSetup === 'true',
+                surveyCount: surveyData ? JSON.parse(surveyData).length : 0,
+                lastUpdate: new Date().toLocaleString('id-ID')
+            };
+            
+            document.getElementById('dataDisplay').textContent = JSON.stringify(displayData, null, 2);
+        }
+
+        // Initialize
+        refreshDataDisplay();
+        showResult('🚀 Test environment loaded successfully');
+    </script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+from openpyxl import Workbook
+from openpyxl.worksheet.datavalidation import DataValidation
+
+# Buat workbook baru
+wb = Workbook()
+
+# =====================
+# Sheet 1: Stakeholder & Kebutuhan
+# =====================
+ws1 = wb.active
+ws1.title = "Stakeholder & Kebutuhan"
+ws1.append(["Stakeholder","Kebutuhan Utama","Prioritas","Status Validasi","Catatan"])
+
+data_stakeholder = [
+    ["Pengurus Masjid","Kontrol jadwal sholat, perangkat elektronik, keuangan","Tinggi","Belum",""],
+    ["Jamaah","Akses jadwal sholat, notifikasi iqomah, live streaming","Tinggi","Belum",""],
+    ["Teknisi / Developer","Monitoring sistem, integrasi hardware & software","Tinggi","Belum",""],
+    ["Vendor / Penyedia Perangkat","Spesifikasi teknis, kompatibilitas perangkat","Sedang","Belum",""]
+]
+
+for row in data_stakeholder:
+    ws1.append(row)
+
+dv_prioritas = DataValidation(type="list", formula1='"Tinggi,Sedang,Rendah"', allow_blank=True)
+dv_status = DataValidation(type="list", formula1='"Belum,Valid,Perlu Revisi"', allow_blank=True)
+ws1.add_data_validation(dv_prioritas)
+ws1.add_data_validation(dv_status)
+dv_prioritas.add("C2:C100")
+dv_status.add("D2:D100")
+
+# =====================
+# Sheet 2: Fitur & Fungsi
+# =====================
+ws2 = wb.create_sheet("Fitur & Fungsi")
+ws2.append(["Fitur","Fungsi","Prioritas","Fungsional/Non-Fungsional","Status Validasi","Catatan"])
+
+data_fitur = [
+    ["Jadwal Sholat Otomatis","Hitung waktu sholat, update otomatis, hitung mundur iqomah","Tinggi","Fungsional","Belum",""],
+    ["Kontrol Perangkat Elektronik","Lampu, sound system, AC/pendingin otomatis/manual","Tinggi","Fungsional","Belum",""],
+    ["Display & Pengumuman","7-segment, LED, TV; live streaming","Tinggi","Fungsional","Belum",""],
+    ["Manajemen Keuangan Digital","Zakat, infaq, wakaf; dashboard real-time","Tinggi","Fungsional","Belum",""],
+    ["Monitoring Lingkungan","Sensor suhu, kelembapan, cahaya; deteksi jamaah","Sedang","Fungsional","Belum",""]
+]
+
+for row in data_fitur:
+    ws2.append(row)
+
+dv_prioritas2 = DataValidation(type="list", formula1='"Tinggi,Sedang,Rendah"', allow_blank=True)
+dv_status2 = DataValidation(type="list", formula1='"Belum,Valid,Perlu Revisi"', allow_blank=True)
+ws2.add_data_validation(dv_prioritas2)
+ws2.add_data_validation(dv_status2)
+dv_prioritas2.add("C2:C100")
+dv_status2.add("E2:E100")
+
+# =====================
+# Sheet 3: Use Case / User Story
+# =====================
+ws3 = wb.create_sheet("Use Case / User Story")
+ws3.append(["User Story","Aktor","Tujuan","Hasil yang Diharapkan","Prioritas","Status"])
+ws3.append(["Menampilkan jadwal sholat otomatis","Pengurus","Memudahkan jamaah mengetahui waktu sholat","Jamaah melihat jadwal akurat","Tinggi","Belum"])
+ws3.append(["Notifikasi iqomah di aplikasi","Jamaah","Jamaah bersiap lebih awal","Jamaah tepat waktu","Tinggi","Belum"])
+
+dv_prioritas3 = DataValidation(type="list", formula1='"Tinggi,Sedang,Rendah"', allow_blank=True)
+dv_status3 = DataValidation(type="list", formula1='"Belum,Sedang,Selesai"', allow_blank=True)
+ws3.add_data_validation(dv_prioritas3)
+ws3.add_data_validation(dv_status3)
+dv_prioritas3.add("E2:E100")
+dv_status3.add("F2:F100")
+
+# =====================
+# Sheet 4: Tabel Prioritas Fitur
+# =====================
+ws4 = wb.create_sheet("Tabel Prioritas Fitur")
+ws4.append(["Fitur","Prioritas","Keterangan","Status Implementasi","Catatan"])
+ws4.append(["Jadwal Sholat Otomatis","Tinggi","Fungsi utama masjid","Belum",""])
+ws4.append(["Kontrol Perangkat Elektronik","Tinggi","Efisiensi energi & kenyamanan","Belum",""])
+ws4.append(["Display & Pengumuman","Sedang","Bisa tahap kedua","Belum",""])
+
+dv_prioritas4 = DataValidation(type="list", formula1='"Tinggi,Sedang,Rendah"', allow_blank=True)
+dv_status4 = DataValidation(type="list", formula1='"Belum,Sedang,Selesai"', allow_blank=True)
+ws4.add_data_validation(dv_prioritas4)
+ws4.add_data_validation(dv_status4)
+dv_prioritas4.add("B2:B100")
+dv_status4.add("D2:D100")
+
+# =====================
+# Sheet 5: Catatan & Referensi
+# =====================
+ws5 = wb.create_sheet("Catatan & Referensi")
+ws5.append(["No","Referensi","Topik / Insight","Catatan"])
+ws5.append([1,"Safiq Rosad, 2025","Panduan digitalisasi masjid","Strategi integrasi IoT & cloud"])
+ws5.append([2,"Febrianty, 2023","Aplikasi Smart Mosque","Validasi usability & kepuasan pengguna"])
+ws5.append([3,"Totonchi, 2020","Smart Mosque berbasis IoT","Prioritas fitur jamaah"])
+ws5.append([4,"Abdallah et al., 2023","Energy efficiency & IoT","Sensor okupansi & efisiensi energi"])
+
+# =====================
+# Simpan file
+# =====================
+wb.save(r"C:\Users\Programming\Downloads\Smart_Mosque_Requirement_Analysis.xlsx")
+print("File berhasil dibuat di C:\\Users\\Programming\\Downloads\\Smart_Mosque_Requirement_Analysis.xlsx")

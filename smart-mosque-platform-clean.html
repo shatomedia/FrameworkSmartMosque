@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taqwa: Smart Mosque Platform</title>
+    
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        /* Platform Container */
+        .platform-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Platform Header */
+        .platform-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .platform-title h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .collaboration-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 0.9rem;
+        }
+
+        .online-users {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 80px);
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: white;
+            padding: 25px;
+            border-right: 1px solid #e2e8f0;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: #f1f5f9;
+            color: #667eea;
+        }
+
+        .nav-item.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .nav-item span:first-child {
+            font-size: 1.1rem;
+        }
+
+        /* Progress Ring */
+        .progress-ring {
+            position: relative;
+            margin: 15px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: conic-gradient(#667eea 0deg 241deg, #e2e8f0 241deg 360deg);
+            border-radius: 50%;
+        }
+
+        .progress-ring::before {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .progress-percentage {
+            position: relative;
+            z-index: 1;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: #f8fafc;
+        }
+
+        /* Process Guide Sections */
+        .process-guide {
+            display: none;
+        }
+
+        .process-guide.active {
+            display: block;
+        }
+
+        .process-step {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 4px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .process-step.completed {
+            border-left-color: #10b981;
+            background: linear-gradient(to right, #f0fdf4, white);
+        }
+
+        .process-step.in-progress {
+            border-left-color: #f59e0b;
+            background: linear-gradient(to right, #fffbeb, white);
+        }
+
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .step-header h4 {
+            color: #1e293b;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .step-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-completed {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-progress {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-todo {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        /* Stakeholder Chips */
+        .stakeholder-list {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+
+        .stakeholder-chip {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stakeholder-chip.online {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .stakeholder-chip.online::before {
+            content: '🟢';
+            font-size: 0.7rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        /* Cards and Grids */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Form Elements */
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: border-color 0.2s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* Widget Styles */
+        .widget {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .widget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .widget-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            padding: 15px 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            z-index: 10001;
+            max-width: 400px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .notification.success {
+            border-left: 4px solid #10b981;
+        }
+
+        .notification.info {
+            border-left: 4px solid #3b82f6;
+        }
+
+        .notification.error {
+            border-left: 4px solid #ef4444;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-layout {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .platform-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .collaboration-info {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        }
+
+        /* Animation Classes */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-up {
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Additional Utility Classes */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .mb-10 { margin-bottom: 10px; }
+        .mb-15 { margin-bottom: 15px; }
+        .mb-20 { margin-bottom: 20px; }
+        .mt-10 { margin-top: 10px; }
+        .mt-15 { margin-top: 15px; }
+        .mt-20 { margin-top: 20px; }
+        
+        .flex { display: flex; }
+        .flex-wrap { flex-wrap: wrap; }
+        .gap-10 { gap: 10px; }
+        .gap-15 { gap: 15px; }
+        .gap-20 { gap: 20px; }
+        
+        .rounded { border-radius: 8px; }
+        .rounded-lg { border-radius: 12px; }
+        .shadow { box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .shadow-lg { box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <div class="platform-container">
+        <!-- Platform Header -->
+        <div class="platform-header">
+            <div class="platform-title">
+                <h1>🕌 Taqwa: Smart Mosque Platform</h1>
+                <span style="color: #e2e8f0; font-size: 0.9rem;">Collaborative Framework for Mosque Digitalization</span>
+            </div>
+            <div class="collaboration-info">
+                <div class="online-users">
+                    <span>👥</span>
+                    <span id="onlineCount">5 Online</span>
+                    <div class="user-avatar">AA</div>
+                    <div class="user-avatar">BB</div>
+                    <div class="user-avatar">CC</div>
+                </div>
+                <div style="color: #e2e8f0;">
+                    <span>📊</span>
+                    <span id="currentProject">Project: Masjid Al-Hidayah</span>
+                </div>
+                <div style="color: #e2e8f0;">
+                    <span>⏱️</span>
+                    <span id="autoSaveStatus">Auto-save: 30s ago</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Layout -->
+        <div class="main-layout">
+            <!-- Sidebar Navigation -->
+            <div class="sidebar">
+                <h3 style="margin-bottom: 20px; color: #2c3e50;">📋 Framework Modules</h3>
+                <div class="nav-item active" data-section="process-guide">
+                    <span>🗺️</span>
+                    <span>Panduan Proses</span>
+                </div>
+                <div class="nav-item" data-section="templates">
+                    <span>📄</span>
+                    <span>Template & Tools</span>
+                </div>
+                <div class="nav-item" data-section="survey">
+                    <span>📊</span>
+                    <span>Survey Interaktif</span>
+                </div>
+                <div class="nav-item" data-section="analysis">
+                    <span>📈</span>
+                    <span>Analisis & Insight</span>
+                </div>
+                <div class="nav-item" data-section="collaboration">
+                    <span>👥</span>
+                    <span>Kolaborasi Tim</span>
+                </div>
+                <div class="nav-item" data-section="integrations">
+                    <span>🔗</span>
+                    <span>Integrasi Tools</span>
+                </div>
+                <div class="nav-item" data-section="dashboard">
+                    <span>📊</span>
+                    <span>Dashboard Visual</span>
+                </div>
+                <div class="nav-item" data-section="settings">
+                    <span>⚙️</span>
+                    <span>Settings & Reset</span>
+                </div>
+                
+                <hr style="margin: 20px 0; border: none; height: 1px; background: #e0e6ed;">
+                
+                <div style="margin-top: 20px;">
+                    <div style="font-weight: 600; margin-bottom: 10px; color: #2c3e50;">📈 Progress Overall</div>
+                    <div class="progress-ring" style="width: 80px; height: 80px;">
+                        <div class="progress-percentage" style="font-size: 0.9rem;" id="overallProgress">67%</div>
+                    </div>
+                    <div style="text-align: center; color: #6b7280; font-size: 0.9rem;">
+                        <span id="currentPhase">Phase 2 dari 4</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="main-content">
+                <!-- Process Guide Section -->
+                <div id="process-guide" class="process-guide active">
+                    <h2 style="margin-bottom: 20px; color: #2c3e50;">🗺️ Panduan Proses Komprehensif</h2>
+                    
+                    <div class="process-step completed">
+                        <div class="step-header">
+                            <h4>Phase 1: Persiapan & Planning</h4>
+                            <div class="step-status status-completed">✅ Selesai</div>
+                        </div>
+                        <p>Tim framework telah dibentuk, stakeholder teridentifikasi, dan tools persiapan sudah ready.</p>
+                        <div class="stakeholder-list">
+                            <div class="stakeholder-chip online">Ahmad (Ketua Takmir)</div>
+                            <div class="stakeholder-chip online">Siti (Bendahara)</div>
+                            <div class="stakeholder-chip">Budi (IT Support)</div>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <strong>Deliverables:</strong> Team Charter, Stakeholder Map, Communication Plan
+                        </div>
+                    </div>
+
+                    <div class="process-step in-progress">
+                        <div class="step-header">
+                            <h4>Phase 2: Pengumpulan Data & Survey</h4>
+                            <div class="step-status status-progress" id="phase2Status">🔄 In Progress (<span id="phase2Progress">67</span>%)</div>
+                        </div>
+                        <p>Sedang melakukan survey kepada pengurus dan jamaah. Target completion: <span id="targetDate">15 Oktober 2025</span></p>
+                        <div style="margin: 15px 0;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span>Survey Pengurus</span>
+                                <span id="pengurusCount">8/10 responden</span>
+                            </div>
+                            <div style="background: #e0e6ed; height: 8px; border-radius: 4px; overflow: hidden;">
+                                <div id="pengurusProgress" style="background: #667eea; height: 100%; width: 80%;"></div>
+                            </div>
+                        </div>
+                        <div style="margin: 15px 0;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span>Survey Jamaah</span>
+                                <span id="jamaahCount">45/75 responden</span>
+                            </div>
+                            <div style="background: #e0e6ed; height: 8px; border-radius: 4px; overflow: hidden;">
+                                <div id="jamaahProgress" style="background: #f39c12; height: 100%; width: 60%;"></div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <button class="btn btn-primary" onclick="openSurveyModal()">📊 Lanjutkan Survey</button>
+                            <button class="btn btn-secondary" onclick="viewProgress()">📈 Lihat Progress Detail</button>
+                            <button class="btn btn-secondary" onclick="updateProgressData()" style="margin-left: 10px;">🔄 Update Data</button>
+                        </div>
+                    </div>
+
+                    <div class="process-step">
+                        <div class="step-header">
+                            <h4>Phase 3: Analisis & Prioritisasi</h4>
+                            <div class="step-status status-todo">⏳ Menunggu</div>
+                        </div>
+                        <p>Akan dimulai setelah fase pengumpulan data selesai. Estimasi: 20 Oktober 2025</p>
+                        <div style="margin-top: 15px;">
+                            <strong>Rencana:</strong> MoSCoW Analysis, ROI Calculation, Feature Prioritization
+                        </div>
+                    </div>
+
+                    <div class="process-step">
+                        <div class="step-header">
+                            <h4>Phase 4: Validasi & Finalisasi</h4>
+                            <div class="step-status status-todo">⏳ Menunggu</div>
+                        </div>
+                        <p>Presentasi hasil kepada stakeholder dan finalisasi roadmap implementasi.</p>
+                        <div style="margin-top: 15px;">
+                            <strong>Target:</strong> Dokumen requirements final dan implementation roadmap
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Templates Section -->
+                <div id="templates" class="process-guide">
+                    <h2 style="margin-bottom: 20px; color: #2c3e50;">📄 Template & Tools Library</h2>
+                    
+                    <!-- Quick Setup Wizard - Featured -->
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 15px; margin-bottom: 30px; color: white; box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);">
+                        <div style="display: flex; align-items: center; gap: 20px;">
+                            <div style="font-size: 4rem;">🚀</div>
+                            <div style="flex: 1;">
+                                <h3 style="margin: 0 0 10px 0; color: white; font-size: 1.5rem;">Quick Setup Wizard</h3>
+                                <p style="margin: 0 0 15px 0; color: rgba(255,255,255,0.9); font-size: 1.1rem;">Setup lengkap untuk masjid baru dalam 5 langkah mudah</p>
+                                <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                                    <span style="background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 20px; font-size: 0.9rem;">⚡ 5 Steps</span>
+                                    <span style="background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 20px; font-size: 0.9rem;">⏱️ 15 Minutes</span>
+                                    <span style="background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 20px; font-size: 0.9rem;">🎯 Complete Setup</span>
+                                </div>
+                                <button onclick="startQuickSetup()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; backdrop-filter: blur(10px);">
+                                    🚀 Mulai Quick Setup
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Template Grid -->
+                    <div class="grid grid-2">
+                        <!-- Survey Templates -->
+                        <div class="card">
+                            <h3 style="color: #667eea; margin-bottom: 15px;">📊 Survey Templates</h3>
+                            <p style="margin-bottom: 15px; color: #64748b;">Template survey tersegmentasi untuk berbagai stakeholder</p>
+                            <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+                                <button onclick="useTemplate('pengurus')" class="btn btn-primary" style="flex: 1; min-width: 120px;">👔 Pengurus</button>
+                                <button onclick="useTemplate('jamaah')" class="btn btn-primary" style="flex: 1; min-width: 120px;">🕌 Jamaah</button>
+                                <button onclick="useTemplate('teknisi')" class="btn btn-primary" style="flex: 1; min-width: 120px;">🔧 Teknisi</button>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button onclick="previewTemplate('survey')" class="btn btn-secondary">👁️ Preview</button>
+                                <button onclick="downloadTemplate('survey')" class="btn btn-secondary">💾 Download</button>
+                            </div>
+                        </div>
+
+                        <!-- Business Model Canvas -->
+                        <div class="card">
+                            <h3 style="color: #10b981; margin-bottom: 15px;">📈 Business Model Canvas</h3>
+                            <p style="margin-bottom: 15px; color: #64748b;">Framework strategis untuk perencanaan model bisnis masjid</p>
+                            <div style="margin-bottom: 15px; padding: 10px; background: #f0fdf4; border-radius: 6px;">
+                                <div style="font-size: 0.85rem; color: #166534;">✅ Sudah disesuaikan dengan konteks masjid dan nilai-nilai Islam</div>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button onclick="useTemplate('canvas')" class="btn btn-primary">📋 Gunakan</button>
+                                <button onclick="previewTemplate('canvas')" class="btn btn-secondary">👁️ Preview</button>
+                            </div>
+                        </div>
+
+                        <!-- Technical Assessment -->
+                        <div class="card">
+                            <h3 style="color: #f59e0b; margin-bottom: 15px;">🔧 Technical Assessment</h3>
+                            <p style="margin-bottom: 15px; color: #64748b;">Checklist komprehensif untuk evaluasi infrastruktur teknis</p>
+                            <div style="margin-bottom: 15px;">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #64748b;">
+                                    <span>📋 60+ Checklist Items</span>
+                                    <span>⏱️ 45-60 minutes</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button onclick="useTemplate('technical')" class="btn btn-primary">🔧 Mulai Assessment</button>
+                                <button onclick="downloadTemplate('technical')" class="btn btn-secondary">💾 Download</button>
+                            </div>
+                        </div>
+
+                        <!-- Documentation Kit -->
+                        <div class="card">
+                            <h3 style="color: #8b5cf6; margin-bottom: 15px;">📚 Documentation Kit</h3>
+                            <p style="margin-bottom: 15px; color: #64748b;">Template dokumentasi lengkap untuk project management</p>
+                            <div style="margin-bottom: 15px;">
+                                <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                                    <span style="background: #f3f4f6; color: #374151; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem;">Requirements</span>
+                                    <span style="background: #f3f4f6; color: #374151; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem;">Meeting Notes</span>
+                                    <span style="background: #f3f4f6; color: #374151; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem;">Progress Reports</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button onclick="useTemplate('documentation')" class="btn btn-primary">📚 Akses Kit</button>
+                                <button onclick="downloadTemplate('documentation')" class="btn btn-secondary">💾 Download All</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Survey Section -->
+                <div id="survey" class="process-guide">
+                    <h2 style="margin-bottom: 20px; color: #2c3e50;">📊 Survey Interaktif</h2>
+                    
+                    <div class="grid grid-2">
+                        <div class="card">
+                            <h3 style="color: #667eea; margin-bottom: 15px;">📊 Survey Dashboard</h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                                <div style="text-align: center; padding: 15px; background: #f8fafc; border-radius: 8px;">
+                                    <div style="font-size: 1.5rem; font-weight: 600; color: #667eea;" id="totalSurveys">23</div>
+                                    <div style="font-size: 0.85rem; color: #64748b;">Total Survey</div>
+                                </div>
+                                <div style="text-align: center; padding: 15px; background: #f8fafc; border-radius: 8px;">
+                                    <div style="font-size: 1.5rem; font-weight: 600; color: #10b981;" id="todaySurveys">5</div>
+                                    <div style="font-size: 0.85rem; color: #64748b;">Hari Ini</div>
+                                </div>
+                            </div>
+                            <button onclick="openSurveyModal()" class="btn btn-primary" style="width: 100%;">📊 Mulai Survey Baru</button>
+                        </div>
+
+                        <div class="card">
+                            <h3 style="color: #10b981; margin-bottom: 15px;">💾 Data Management</h3>
+                            <p style="margin-bottom: 15px; color: #64748b;">Export dan backup data survey</p>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <button onclick="exportData()" class="btn btn-secondary">📤 Export Data</button>
+                                <button onclick="importData()" class="btn btn-secondary">📥 Import Data</button>
+                                <button onclick="viewSurveyStats()" class="btn btn-secondary">📈 Lihat Statistik</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analysis Section -->
+                <div id="analysis" class="process-guide">
+                    <h2 style="margin-bottom: 20px; color: #2c3e50;">📈 Analisis & Insight</h2>
+                    
+                    <div class="card">
+                        <h3 style="color: #667eea; margin-bottom: 15px;">🔍 Analisis Akan Tersedia</h3>
+                        <p style="color: #64748b;">Fitur analisis akan aktif setelah data survey terkumpul minimal 10 responden per kategori.</p>
+                        <div style="margin: 20px 0; padding: 15px; background: #f8fafc; border-radius: 8px;">
+                            <div style="font-weight: 600; margin-bottom: 10px;">📊 Progress Saat Ini:</div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                        <span>Survey Pengurus</span>
+                                        <span>8/10</span>
+                                    </div>
+                                    <div style="background: #e0e6ed; height: 6px; border-radius: 3px; overflow: hidden;">
+                                        <div style="background: #667eea; height: 100%; width: 80%;"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                        <span>Survey Jamaah</span>
+                                        <span>5/10</span>
+                                    </div>
+                                    <div style="background: #e0e6ed; height: 6px; border-radius: 3px; overflow: hidden;">
+                                        <div style="background: #f39c12; height: 100%; width: 50%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="openSurveyModal()" class="btn btn-primary">📊 Lanjutkan Survey</button>
+                    </div>
+                </div>
+
+                <!-- Collaboration Section -->
+                <div id="collaboration" class="process-guide">
+                    <h2 style="margin-bottom: 20px; color: #2c3e50;">👥 Kolaborasi Tim</h2>
+                    
+                    <div class="grid grid-2">
+                        <div class="card">
+                            <h3 style="color: #667eea; margin-bottom: 15px;">👥 Team Members</h3>
+                            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+                                <div style="display: flex; align-items: center; gap: 12px; padding: 10px; background: #f8fafc; border-radius: 8px;">
+                                    <div class="user-avatar" style="background: #667eea; color: white;">AA</div>
+                                    <div>
+                                        <div style="font-weight: 600;">Ahmad (Ketua Takmir)</div>
+                                        <div style="font-size: 0.85rem; color: #64748b;">🟢 Online</div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 12px; padding: 10px; background: #f8fafc; border-radius: 8px;">
+                                    <div class="user-avatar" style="background: #10b981; color: white;">SS</div>
+                                    <div>
+                                        <div style="font-weight: 600;">Siti (Bendahara)</div>
+                                        <div style="font-size: 0.85rem; color: #64748b;">🟢 Online</div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 12px; padding: 10px; background: #f8fafc; border-radius: 8px;">
+                                    <div class="user-avatar" style="background: #f59e0b; color: white;">BB</div>
+                                    <div>
+                                        <div style="font-weight: 600;">Budi (IT Support)</div>
+                                        <div style="font-size: 0.85rem; color: #64748b;">⚫ Offline</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onclick="inviteTeamMember()" class="btn btn-primary">➕ Undang Anggota</button>
+                        </div>
+
+                        <div class="card">
+                            <h3 style="color: #10b981; margin-bottom: 15px;">💬 Recent Activity</h3>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <div style="padding: 10px; background: #f0fdf4; border-radius: 8px; border-left: 3px solid #10b981;">
+                                    <div style="font-size: 0.85rem; color: #166534;">Ahmad menyelesaikan survey pengurus</div>
+                                    <div style="font-size: 0.75rem; color: #64748b;">2 jam yang lalu</div>
+                                </div>
+                                <div style="padding: 10px; background: #eff6ff; border-radius: 8px; border-left: 3px solid #3b82f6;">
+                                    <div style="font-size: 0.85rem; color: #1e40af;">Siti mengupdate template keuangan</div>
+                                    <div style="font-size: 0.75rem; color: #64748b;">4 jam yang lalu</div>
+                                </div>
+                                <div style="padding: 10px; background: #fef3c7; border-radius: 8px; border-left: 3px solid #f59e0b;">
+                                    <div style="font-size: 0.85rem; color: #92400e;">Data auto-saved</div>
+                                    <div style="font-size: 0.75rem; color: #64748b;">5 menit yang lalu</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Integrations Section -->
+                <div id="integrations" class="process-guide">
+                    <h2 style="margin-bottom: 20px; color: #2c3e50;">🔗 Integrasi Tools</h2>
+                    
+                    <div class="grid grid-3">
+                        <div class="card">
+                            <h3 style="color: #667eea; margin-bottom: 15px;">📊 Google Sheets</h3>
+                            <p style="margin-bottom: 15px; color: #64748b; font-size: 0.9rem;">Sync data survey ke Google Sheets untuk analisis lanjutan</p>
+                            <button onclick="connectIntegration('Google Sheets')" class="btn btn-primary" style="width: 100%;">🔗 Connect</button>
+                        </div>
+
+                        <div class="card">
+                            <h3 style="color: #10b981; margin-bottom: 15px;">📧 Email Integration</h3>
+                            <p style="margin-bottom: 15px; color: #64748b; font-size: 0.9rem;">Kirim notifikasi dan report otomatis via email</p>
+                            <button onclick="connectIntegration('Email')" class="btn btn-primary" style="width: 100%;">📧 Setup</button>
+                        </div>
+
+                        <div class="card">
+                            <h3 style="color: #f59e0b; margin-bottom: 15px;">💬 WhatsApp</h3>
+                            <p style="margin-bottom: 15px; color: #64748b; font-size: 0.9rem;">Notifikasi progress dan reminder via WhatsApp</p>
+                            <button onclick="connectIntegration('WhatsApp')" class="btn btn-primary" style="width: 100%;">💬 Connect</button>
+                        </div>
+
+                        <div class="card">
+                            <h3 style="color: #8b5cf6; margin-bottom: 15px;">🔧 API Manager</h3>
+                            <p style="margin-bottom: 15px; color: #64748b; font-size: 0.9rem;">Kelola API endpoints dan webhook integration</p>
+                            <button onclick="openAPIManager()" class="btn btn-primary" style="width: 100%;">⚙️ Manage</button>
+                        </div>
+
+                        <div class="card">
+                            <h3 style="color: #ef4444; margin-bottom: 15px;">☁️ Cloud Backup</h3>
+                            <p style="margin-bottom: 15px; color: #64748b; font-size: 0.9rem;">Backup otomatis ke cloud storage</p>
+                            <button onclick="connectIntegration('Cloud Backup')" class="btn btn-primary" style="width: 100%;">☁️ Setup</button>
+                        </div>
+
+                        <div class="card">
+                            <h3 style="color: #06b6d4; margin-bottom: 15px;">📱 Mobile App</h3>
+                            <p style="margin-bottom: 15px; color: #64748b; font-size: 0.9rem;">Sinkronisasi dengan aplikasi mobile mosque</p>
+                            <button onclick="connectIntegration('Mobile App')" class="btn btn-primary" style="width: 100%;">📱 Connect</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Section -->
+                <div id="dashboard" class="process-guide">
+                    <h2 style="margin-bottom: 20px; color: #2c3e50;">📊 Dashboard Visual</h2>
+                    
+                    <div class="card">
+                        <h3 style="color: #667eea; margin-bottom: 15px;">📊 Dashboard Akan Tersedia</h3>
+                        <p style="color: #64748b;">Dashboard visual akan tersedia setelah data survey mencukupi untuk analisis.</p>
+                        <div style="margin: 20px 0; padding: 20px; background: #f8fafc; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 3rem; margin-bottom: 10px;">📊</div>
+                            <div style="font-weight: 600; margin-bottom: 10px;">Dashboard Preview</div>
+                            <div style="color: #64748b; font-size: 0.9rem;">Charts, graphs, dan insight akan ditampilkan di sini</div>
+                        </div>
+                        <div style="display: flex; gap: 10px; justify-content: center;">
+                            <button onclick="openSurveyModal()" class="btn btn-primary">📊 Lanjutkan Survey</button>
+                            <button onclick="previewDashboard()" class="btn btn-secondary">👁️ Preview Dashboard</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Section -->
+                <div id="settings" class="process-guide">
+                    <h2 style="margin-bottom: 20px; color: #2c3e50;">⚙️ Settings & Reset</h2>
+                    
+                    <div class="grid grid-2">
+                        <div class="card">
+                            <h3 style="color: #667eea; margin-bottom: 15px;">⚙️ Platform Settings</h3>
+                            <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f8fafc; border-radius: 8px;">
+                                    <span>Auto-save</span>
+                                    <label style="position: relative; display: inline-block; width: 40px; height: 20px; background: #667eea; border-radius: 20px; cursor: pointer;">
+                                        <input type="checkbox" checked style="opacity: 0; width: 0; height: 0;">
+                                        <span style="position: absolute; top: 2px; left: 22px; width: 16px; height: 16px; background: white; border-radius: 50%; transition: 0.3s;"></span>
+                                    </label>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f8fafc; border-radius: 8px;">
+                                    <span>Email notifications</span>
+                                    <label style="position: relative; display: inline-block; width: 40px; height: 20px; background: #e2e8f0; border-radius: 20px; cursor: pointer;">
+                                        <input type="checkbox" style="opacity: 0; width: 0; height: 0;">
+                                        <span style="position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: white; border-radius: 50%; transition: 0.3s;"></span>
+                                    </label>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f8fafc; border-radius: 8px;">
+                                    <span>Dark mode</span>
+                                    <label style="position: relative; display: inline-block; width: 40px; height: 20px; background: #e2e8f0; border-radius: 20px; cursor: pointer;">
+                                        <input type="checkbox" style="opacity: 0; width: 0; height: 0;">
+                                        <span style="position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: white; border-radius: 50%; transition: 0.3s;"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <button onclick="saveSettings()" class="btn btn-primary" style="width: 100%;">💾 Save Settings</button>
+                        </div>
+
+                        <div class="card" style="border: 1px solid #fecaca;">
+                            <h3 style="color: #ef4444; margin-bottom: 15px;">🗑️ Reset Data</h3>
+                            <p style="margin-bottom: 15px; color: #64748b;">Reset semua data platform kembali ke kondisi awal</p>
+                            <div style="padding: 15px; background: #fef2f2; border-radius: 8px; margin-bottom: 15px; border-left: 3px solid #ef4444;">
+                                <div style="font-weight: 600; color: #dc2626; margin-bottom: 5px;">⚠️ Peringatan</div>
+                                <div style="font-size: 0.9rem; color: #991b1b;">
+                                    Aksi ini akan menghapus semua data survey, progress, dan konfigurasi. 
+                                    Pastikan Anda sudah membuat backup.
+                                </div>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <button onclick="exportData()" class="btn btn-secondary">📤 Backup Data Dulu</button>
+                                <button onclick="resetPlatform()" class="btn" style="background: #ef4444; color: white;">🗑️ Reset Platform</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Notification System
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div>${message}</div>
+                    <button onclick="this.closest('.notification').remove()" style="background: none; border: none; color: #64748b; cursor: pointer; font-size: 1.2rem; margin-left: auto;">×</button>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Navigation System
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.process-guide').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show target section
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+            
+            // Update navigation
+            document.querySelectorAll('.nav-item').forEach(nav => {
+                nav.classList.remove('active');
+            });
+            
+            const activeNav = document.querySelector(`[data-section="${sectionId}"]`);
+            if (activeNav) {
+                activeNav.classList.add('active');
+            }
+        }
+
+        // Survey Functions
+        function openSurveyModal() {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3 style="margin-bottom: 20px; color: #667eea;">📊 Survey Smart Mosque</h3>
+                    <p style="margin-bottom: 20px; color: #666;">Pilih jenis survey yang ingin Anda isi:</p>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px;">
+                        <button onclick="openSurvey('pengurus')" class="btn btn-primary" style="flex: 1; min-width: 140px;">
+                            👔 Survey Pengurus
+                        </button>
+                        <button onclick="openSurvey('jamaah')" class="btn btn-primary" style="flex: 1; min-width: 140px;">
+                            🕌 Survey Jamaah
+                        </button>
+                    </div>
+                    <div style="text-align: center;">
+                        <button onclick="this.closest('.modal').remove()" class="btn btn-secondary">
+                            ❌ Tutup
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) modal.remove();
+            });
+        }
+
+        function openSurvey(type) {
+            const modal = document.querySelector('.modal');
+            if (modal) modal.remove();
+            
+            showNotification(`📊 Membuka survey ${type}...`, 'info');
+            setTimeout(() => {
+                showNotification(`✅ Survey ${type} berhasil dibuka!`, 'success');
+            }, 1500);
+        }
+
+        // Template Functions
+        function useTemplate(templateType) {
+            showNotification(`📄 Menggunakan template ${templateType}...`, 'info');
+            setTimeout(() => {
+                showNotification(`✅ Template ${templateType} siap digunakan!`, 'success');
+            }, 1500);
+        }
+
+        function previewTemplate(templateType) {
+            showNotification(`👁️ Membuka preview template ${templateType}...`, 'info');
+        }
+
+        function downloadTemplate(templateType) {
+            showNotification(`💾 Mengunduh template ${templateType}...`, 'info');
+            setTimeout(() => {
+                showNotification(`✅ Template ${templateType} berhasil diunduh!`, 'success');
+            }, 2000);
+        }
+
+        // Quick Setup Wizard
+        function startQuickSetup() {
+            showNotification(`🚀 Memulai Quick Setup Wizard...`, 'info');
+            setTimeout(() => {
+                showNotification(`✅ Quick Setup berhasil dimulai!`, 'success');
+            }, 1500);
+        }
+
+        // Progress Update Function
+        function updateProgressData() {
+            showNotification(`🔄 Memperbarui data progress...`, 'info');
+            
+            setTimeout(() => {
+                // Update random progress values
+                const phase2Progress = Math.floor(Math.random() * 20) + 65; // 65-85%
+                const pengurusCount = Math.floor(Math.random() * 3) + 8; // 8-10
+                const jamaahCount = Math.floor(Math.random() * 10) + 45; // 45-55
+                
+                // Update UI elements
+                const phase2Element = document.getElementById('phase2Progress');
+                const pengurusElement = document.getElementById('pengurusCount');
+                const jamaahElement = document.getElementById('jamaahCount');
+                const pengurusProgressBar = document.getElementById('pengurusProgress');
+                const jamaahProgressBar = document.getElementById('jamaahProgress');
+                const overallProgress = document.getElementById('overallProgress');
+                
+                if (phase2Element) phase2Element.textContent = phase2Progress;
+                if (pengurusElement) pengurusElement.textContent = `${pengurusCount}/10 responden`;
+                if (jamaahElement) jamaahElement.textContent = `${jamaahCount}/75 responden`;
+                if (pengurusProgressBar) pengurusProgressBar.style.width = `${(pengurusCount/10)*100}%`;
+                if (jamaahProgressBar) jamaahProgressBar.style.width = `${(jamaahCount/75)*100}%`;
+                if (overallProgress) overallProgress.textContent = `${phase2Progress}%`;
+                
+                // Update progress ring
+                const progressRing = document.querySelector('.progress-ring');
+                if (progressRing) {
+                    const degree = (phase2Progress / 100) * 360;
+                    progressRing.style.background = `conic-gradient(#667eea 0deg ${degree}deg, #e2e8f0 ${degree}deg 360deg)`;
+                }
+                
+                showNotification(`✅ Data progress berhasil diperbarui! (${phase2Progress}%)`, 'success');
+            }, 2000);
+        }
+
+        // Other Functions
+        function viewProgress() {
+            showNotification(`📈 Menampilkan detail progress...`, 'info');
+        }
+
+        function exportData() {
+            showNotification(`💾 Mengeksport data...`, 'info');
+            setTimeout(() => {
+                showNotification(`✅ Data berhasil dieksport!`, 'success');
+            }, 2000);
+        }
+
+        function importData() {
+            showNotification(`📥 Membuka dialog import...`, 'info');
+        }
+
+        function connectIntegration(service) {
+            showNotification(`🔗 Menghubungkan dengan ${service}...`, 'info');
+            setTimeout(() => {
+                showNotification(`✅ ${service} berhasil terhubung!`, 'success');
+            }, 2000);
+        }
+
+        function inviteTeamMember() {
+            showNotification(`➕ Membuka dialog undangan...`, 'info');
+        }
+
+        function resetPlatform() {
+            if (confirm('Apakah Anda yakin ingin mereset platform? Semua data akan hilang.')) {
+                showNotification(`🔄 Mereset platform...`, 'info');
+                setTimeout(() => {
+                    showNotification(`✅ Platform berhasil direset!`, 'success');
+                }, 2000);
+            }
+        }
+
+        function saveSettings() {
+            showNotification(`💾 Menyimpan pengaturan...`, 'info');
+            setTimeout(() => {
+                showNotification(`✅ Pengaturan berhasil disimpan!`, 'success');
+            }, 1500);
+        }
+
+        function openAPIManager() {
+            showNotification(`🔧 Membuka API Manager...`, 'info');
+        }
+
+        function previewDashboard() {
+            showNotification(`👁️ Membuka preview dashboard...`, 'info');
+        }
+
+        function viewSurveyStats() {
+            showNotification(`📈 Menampilkan statistik survey...`, 'info');
+        }
+
+        // Initialize Navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Setup navigation click handlers
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const section = this.getAttribute('data-section');
+                    if (section) {
+                        showSection(section);
+                    }
+                });
+            });
+
+            // Auto-update data every 30 seconds
+            setInterval(function() {
+                const autoSaveStatus = document.getElementById('autoSaveStatus');
+                if (autoSaveStatus) {
+                    const now = new Date();
+                    autoSaveStatus.textContent = `Auto-save: ${now.getSeconds()}s ago`;
+                }
+            }, 30000);
+
+            // Welcome notification
+            setTimeout(() => {
+                showNotification('🕌 Selamat datang di Smart Mosque Platform!', 'success');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

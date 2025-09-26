@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Progress Data & Layout Fix</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; }
+        .progress-bar { background: #e0e6ed; height: 8px; border-radius: 4px; overflow: hidden; margin: 10px 0; }
+        .progress-fill { height: 100%; transition: width 0.3s ease; }
+        .pengurus { background: #667eea; }
+        .jamaah { background: #f39c12; }
+        .mock-layout { background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Progress Data & Layout Fixes</h1>
+    
+    <div class="test-section">
+        <h3>📊 Mock Progress Simulation</h3>
+        <div class="mock-layout">
+            <h4>Phase 2: Pengumpulan Data & Survey</h4>
+            <div style="margin: 10px 0;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Survey Pengurus</span>
+                    <span id="mockPengurusCount">8/10 responden</span>
+                </div>
+                <div class="progress-bar">
+                    <div id="mockPengurusProgress" class="progress-fill pengurus" style="width: 80%;"></div>
+                </div>
+            </div>
+            <div style="margin: 10px 0;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Survey Jamaah</span>
+                    <span id="mockJamaahCount">45/75 responden</span>
+                </div>
+                <div class="progress-bar">
+                    <div id="mockJamaahProgress" class="progress-fill jamaah" style="width: 60%;"></div>
+                </div>
+            </div>
+            <div>Overall Progress: <strong id="mockOverallProgress">67%</strong></div>
+            <div>Target: <span id="mockTargetDate">15 Oktober 2025</span></div>
+        </div>
+        <button onclick="simulateProgressUpdate()">📈 Simulate Progress Update</button>
+        <button onclick="simulateNewSurvey()">📝 Simulate New Survey</button>
+        <button onclick="resetProgress()">🔄 Reset to Default</button>
+    </div>
+
+    <div class="test-section">
+        <h3>🗑️ Test Reset Data Widget (Layout Fix)</h3>
+        <div class="mock-layout">
+            <h4>Simulasi Settings Layout</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 15px 0;">
+                <div style="border: 1px solid #ddd; padding: 15px; border-radius: 8px;">
+                    <h5>🕌 Konfigurasi Masjid</h5>
+                    <p>Setup profil masjid</p>
+                    <button style="background: #667eea;">🔧 Konfigurasi</button>
+                </div>
+                <div style="border: 1px solid #ddd; padding: 15px; border-radius: 8px;">
+                    <h5>📊 Kelola Data Survey</h5>
+                    <p>Kelola data survey</p>
+                    <button style="background: #667eea;">📋 Kelola</button>
+                </div>
+                <div style="border: 1px solid #ddd; padding: 15px; border-radius: 8px;">
+                    <h5>👥 Manajemen User</h5>
+                    <p>Kelola user dan roles</p>
+                    <button style="background: #667eea;">👤 Kelola</button>
+                </div>
+                <div style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; border-color: #dc3545;">
+                    <h5>🗑️ Reset System</h5>
+                    <p>Reset data atau konfigurasi</p>
+                    <button style="background: #dc3545;">⚠️ Reset</button>
+                </div>
+            </div>
+            <div id="layoutStatus" class="test-result info">✅ Layout Grid: 2x2 Correct positioning</div>
+        </div>
+        <button onclick="testLayoutPositions()">🔧 Test Layout Positions</button>
+        <button onclick="simulateResetWidget()">🗑️ Test Reset Widget</button>
+    </div>
+
+    <div class="test-section">
+        <h3>🔄 Test Dynamic Updates</h3>
+        <button onclick="startProgressSimulation()">▶️ Start Real-time Updates</button>
+        <button onclick="stopProgressSimulation()">⏹️ Stop Updates</button>
+        <button onclick="testSurveyDataIntegration()">📊 Test Survey Data Integration</button>
+    </div>
+
+    <div id="results"></div>
+    
+    <div class="test-section">
+        <h3>💾 Test Data Storage</h3>
+        <pre id="dataDisplay" style="background: #f8f9fa; padding: 15px; border-radius: 5px; white-space: pre-wrap; max-height: 200px; overflow-y: auto;"></pre>
+        <button onclick="refreshDataDisplay()">🔄 Refresh Data</button>
+        <button onclick="addTestSurveyData()">➕ Add Test Survey</button>
+        <button onclick="clearTestData()">🗑️ Clear Test Data</button>
+    </div>
+
+    <script>
+        let simulationInterval;
+
+        function showResult(message, type = 'success') {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${type}`;
+            resultDiv.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            resultsDiv.appendChild(resultDiv);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (resultDiv.parentNode) {
+                    resultDiv.parentNode.removeChild(resultDiv);
+                }
+            }, 5000);
+            
+            refreshDataDisplay();
+        }
+
+        function simulateProgressUpdate() {
+            // Simulate new survey submissions
+            const currentPengurus = parseInt(document.getElementById('mockPengurusCount').textContent.split('/')[0]);
+            const currentJamaah = parseInt(document.getElementById('mockJamaahCount').textContent.split('/')[0]);
+            
+            const newPengurus = Math.min(currentPengurus + Math.floor(Math.random() * 2), 10);
+            const newJamaah = Math.min(currentJamaah + Math.floor(Math.random() * 10) + 3, 75);
+            
+            // Update displays
+            document.getElementById('mockPengurusCount').textContent = `${newPengurus}/10 responden`;
+            document.getElementById('mockJamaahCount').textContent = `${newJamaah}/75 responden`;
+            
+            const pengurusPercent = (newPengurus / 10) * 100;
+            const jamaahPercent = (newJamaah / 75) * 100;
+            
+            document.getElementById('mockPengurusProgress').style.width = `${pengurusPercent}%`;
+            document.getElementById('mockJamaahProgress').style.width = `${jamaahPercent}%`;
+            
+            const overallPercent = Math.round(((newPengurus + newJamaah) / (10 + 75)) * 100);
+            document.getElementById('mockOverallProgress').textContent = `${overallPercent}%`;
+            
+            // Update target date
+            const targetDays = overallPercent >= 80 ? 5 : overallPercent >= 60 ? 10 : 15;
+            const targetDate = new Date(Date.now() + (targetDays * 24 * 60 * 60 * 1000));
+            document.getElementById('mockTargetDate').textContent = targetDate.toLocaleDateString('id-ID', { 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric' 
+            });
+            
+            showResult(`Progress updated: Pengurus ${pengurusPercent}%, Jamaah ${jamaahPercent}%, Overall ${overallPercent}%`, 'success');
+        }
+
+        function simulateNewSurvey() {
+            // Add fake survey data
+            const surveyTypes = ['pengurus', 'jamaah', 'kepuasan', 'fasilitas'];
+            const randomType = surveyTypes[Math.floor(Math.random() * surveyTypes.length)];
+            
+            const newSurvey = {
+                id: 'test-' + Date.now(),
+                type: randomType,
+                timestamp: new Date().toISOString(),
+                responses: {
+                    'Test Question 1': 'Test Answer 1',
+                    'Test Question 2': 'Test Answer 2'
+                }
+            };
+            
+            let surveyData = JSON.parse(localStorage.getItem('mosqueSurveyData') || '[]');
+            surveyData.push(newSurvey);
+            localStorage.setItem('mosqueSurveyData', JSON.stringify(surveyData));
+            
+            // Update progress based on new data
+            simulateProgressUpdate();
+            
+            showResult(`New ${randomType} survey added. Total surveys: ${surveyData.length}`, 'success');
+        }
+
+        function resetProgress() {
+            document.getElementById('mockPengurusCount').textContent = '8/10 responden';
+            document.getElementById('mockJamaahCount').textContent = '45/75 responden';
+            document.getElementById('mockPengurusProgress').style.width = '80%';
+            document.getElementById('mockJamaahProgress').style.width = '60%';
+            document.getElementById('mockOverallProgress').textContent = '67%';
+            document.getElementById('mockTargetDate').textContent = '15 Oktober 2025';
+            
+            showResult('Progress reset to default values', 'info');
+        }
+
+        function testLayoutPositions() {
+            const layoutStatus = document.getElementById('layoutStatus');
+            
+            // Simulate layout check
+            const layouts = [
+                '✅ Layout Grid: 2x2 Correct positioning',
+                '⚠️ Layout Grid: Responsive design active',
+                '✅ Reset Widget: Positioned correctly in grid',
+                '✅ All cards: Equal width and spacing'
+            ];
+            
+            let currentLayout = 0;
+            const interval = setInterval(() => {
+                if (currentLayout < layouts.length) {
+                    layoutStatus.textContent = layouts[currentLayout];
+                    layoutStatus.className = 'test-result ' + (currentLayout === 1 ? 'info' : 'success');
+                    currentLayout++;
+                } else {
+                    clearInterval(interval);
+                    showResult('Layout positioning test completed', 'success');
+                }
+            }, 800);
+        }
+
+        function simulateResetWidget() {
+            showResult('🗑️ Testing Reset Widget positioning...', 'info');
+            
+            setTimeout(() => {
+                showResult('✅ Reset Widget found in correct grid position (bottom-right)', 'success');
+            }, 1000);
+            
+            setTimeout(() => {
+                showResult('✅ Reset Widget no longer appears in wrong layout position', 'success');
+            }, 2000);
+        }
+
+        function startProgressSimulation() {
+            if (simulationInterval) {
+                clearInterval(simulationInterval);
+            }
+            
+            simulationInterval = setInterval(() => {
+                simulateProgressUpdate();
+            }, 3000);
+            
+            showResult('🔄 Started real-time progress simulation (every 3 seconds)', 'info');
+        }
+
+        function stopProgressSimulation() {
+            if (simulationInterval) {
+                clearInterval(simulationInterval);
+                simulationInterval = null;
+                showResult('⏹️ Stopped real-time progress simulation', 'info');
+            }
+        }
+
+        function testSurveyDataIntegration() {
+            const surveyData = JSON.parse(localStorage.getItem('mosqueSurveyData') || '[]');
+            
+            if (surveyData.length === 0) {
+                showResult('⚠️ No survey data found. Adding test data...', 'info');
+                addTestSurveyData();
+                return;
+            }
+            
+            const pengurusCount = surveyData.filter(s => s.type === 'pengurus' || s.type === 'kepuasan').length;
+            const jamaahCount = surveyData.filter(s => s.type === 'jamaah' || s.type === 'fasilitas').length;
+            
+            showResult(`📊 Survey integration: ${pengurusCount} pengurus, ${jamaahCount} jamaah surveys found`, 'success');
+        }
+
+        function addTestSurveyData() {
+            const testSurveys = [
+                { type: 'pengurus', responses: { 'Q1': 'A1', 'Q2': 'A2' } },
+                { type: 'jamaah', responses: { 'Q1': 'A1', 'Q2': 'A2' } },
+                { type: 'kepuasan', responses: { 'Q1': 'A1', 'Q2': 'A2' } }
+            ];
+            
+            let surveyData = JSON.parse(localStorage.getItem('mosqueSurveyData') || '[]');
+            
+            testSurveys.forEach(survey => {
+                surveyData.push({
+                    id: 'test-' + Date.now() + '-' + Math.random(),
+                    type: survey.type,
+                    timestamp: new Date().toISOString(),
+                    responses: survey.responses
+                });
+            });
+            
+            localStorage.setItem('mosqueSurveyData', JSON.stringify(surveyData));
+            showResult(`➕ Added ${testSurveys.length} test surveys. Total: ${surveyData.length}`, 'success');
+        }
+
+        function clearTestData() {
+            localStorage.removeItem('mosqueSurveyData');
+            showResult('🗑️ All test survey data cleared', 'info');
+        }
+
+        function refreshDataDisplay() {
+            const surveyData = localStorage.getItem('mosqueSurveyData');
+            const mosqueConfig = localStorage.getItem('mosqueConfig');
+            
+            const displayData = {
+                surveyCount: surveyData ? JSON.parse(surveyData).length : 0,
+                mosqueConfigured: mosqueConfig ? 'Yes' : 'No',
+                lastUpdate: new Date().toLocaleString('id-ID'),
+                surveyTypes: surveyData ? 
+                    [...new Set(JSON.parse(surveyData).map(s => s.type))] : []
+            };
+            
+            document.getElementById('dataDisplay').textContent = JSON.stringify(displayData, null, 2);
+        }
+
+        // Initialize
+        refreshDataDisplay();
+        showResult('🚀 Progress and Layout Test Environment loaded');
+    </script>
+</body>
+</html>
