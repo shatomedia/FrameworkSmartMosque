@@ -1,0 +1,15 @@
+{
+  "name": "Taqwa: Smart Mosque Platform",
+  "short_name": "SmartMosque",
+  "start_url": "/FrameworkSmartMosque/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#667eea",
+  "icons": [
+    {
+      "src": "/FrameworkSmartMosque/assets/icons/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
