@@ -6,6 +6,9 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/status-Active%20Development-orange.svg)](https://github.com/smartmosque/platform/projects)
 [![Platform](https://img.shields.io/badge/platform-Web%20Browser-lightgrey.svg)](https://caniuse.com/es6)
+[![Deploy GitHub Pages](https://github.com/shatomedia/FrameworkSmartMosque/actions/workflows/pages.yml/badge.svg)](https://github.com/shatomedia/FrameworkSmartMosque/actions/workflows/pages.yml)
+
+Live Demo: https://shatomedia.github.io/FrameworkSmartMosque/
 
 **Taqwa: Smart Mosque Platform** adalah framework kolaboratif yang dirancang khusus untuk membantu masjid dalam proses digitalisasi yang sistematis, terstruktur, dan berkelanjutan.
 
