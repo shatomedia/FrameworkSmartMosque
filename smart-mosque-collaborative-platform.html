@@ -989,11 +989,13 @@
             // Update navigation
             document.querySelectorAll('.nav-item').forEach(nav => {
                 nav.classList.remove('active');
+                nav.removeAttribute('aria-current');
             });
             
             const activeNav = document.querySelector(`[data-section="${sectionId}"]`);
             if (activeNav) {
                 activeNav.classList.add('active');
+                activeNav.setAttribute('aria-current', 'page');
             }
         }
 
@@ -1163,12 +1165,22 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Setup navigation click handlers
+            // Setup navigation click & keyboard handlers
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.addEventListener('click', function() {
                     const section = this.getAttribute('data-section');
                     if (section) {
                         showSection(section);
+                    }
+                });
+                item.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        const section = this.getAttribute('data-section');
+                        if (section) {
+                            location.hash = section;
+                            showSection(section);
+                        }
                     }
                 });
             });
