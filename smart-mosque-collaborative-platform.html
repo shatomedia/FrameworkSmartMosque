@@ -1029,32 +1029,135 @@
         }
 
         function openSurvey(type) {
-            const modal = document.querySelector('.modal');
-            if (modal) modal.remove();
-            
-            showNotification(`📊 Membuka survey ${type}...`, 'info');
-            setTimeout(() => {
-                showNotification(`✅ Survey ${type} berhasil dibuka!`, 'success');
-            }, 1500);
+            const prev = document.querySelector('.modal');
+            if (prev) prev.remove();
+
+            const questions = type === 'pengurus'
+                ? [
+                    { key: 'digitalReadiness', label: 'Seberapa siap pengurus terhadap digitalisasi?', type: 'select', options: ['Rendah','Sedang','Tinggi'] },
+                    { key: 'dataManagement', label: 'Apakah ada pengelolaan data jamaah?', type: 'select', options: ['Tidak ada','Manual','Digital'] },
+                    { key: 'priority', label: 'Prioritas perbaikan teratas?', type: 'text', placeholder: 'Contoh: pendataan jamaah' }
+                  ]
+                : [
+                    { key: 'kepuasan', label: 'Kepuasan terhadap layanan masjid', type: 'select', options: ['Kurang','Cukup','Baik','Sangat Baik'] },
+                    { key: 'aksesInfo', label: 'Kemudahan akses informasi kegiatan', type: 'select', options: ['Sulit','Cukup Mudah','Mudah'] },
+                    { key: 'saran', label: 'Saran untuk perbaikan', type: 'text', placeholder: 'Tulis saran Anda' }
+                  ];
+
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width:720px;">
+                    <h3 style="margin-bottom:12px;color:#667eea">${type==='pengurus'?'👔 Survey Pengurus':'🕌 Survey Jamaah'}</h3>
+                    <form id="surveyForm" style="display:grid;gap:12px;">
+                        ${questions.map(q => {
+                            if (q.type === 'select') {
+                                return `<div>
+                                    <label style='font-weight:600;display:block;margin-bottom:6px;'>${q.label}</label>
+                                    <select name="${q.key}" required style='width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;'>
+                                        <option value="" disabled selected>Pilih...</option>
+                                        ${q.options.map(o=>`<option value="${o}">${o}</option>`).join('')}
+                                    </select>
+                                </div>`;
+                            }
+                            return `<div>
+                                <label style='font-weight:600;display:block;margin-bottom:6px;'>${q.label}</label>
+                                <input type="text" name="${q.key}" placeholder="${q.placeholder||''}" required style='width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;' />
+                            </div>`;
+                        }).join('')}
+                        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px;">
+                            <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Batal</button>
+                            <button type="submit" class="btn btn-primary">Kirim Jawaban</button>
+                        </div>
+                    </form>
+                </div>`;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+            modal.querySelector('#surveyForm').addEventListener('submit', e => {
+                e.preventDefault();
+                const form = e.currentTarget;
+                const data = { type, timestamp: new Date().toISOString() };
+                new FormData(form).forEach((v,k)=> data[k]=v);
+                try {
+                    const key = 'smartMosque.surveys';
+                    const existing = JSON.parse(localStorage.getItem(key)||'[]');
+                    existing.push(data);
+                    localStorage.setItem(key, JSON.stringify(existing));
+                    showNotification('✅ Terima kasih! Jawaban Anda tersimpan.', 'success');
+                    modal.remove();
+                    updateSurveyUI();
+                } catch (err) {
+                    console.error(err);
+                    showNotification('❌ Gagal menyimpan jawaban.', 'error');
+                }
+            });
         }
 
         // Template Functions
         function useTemplate(templateType) {
-            showNotification(`📄 Menggunakan template ${templateType}...`, 'info');
-            setTimeout(() => {
-                showNotification(`✅ Template ${templateType} siap digunakan!`, 'success');
-            }, 1500);
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width:720px;">
+                    <h3 style="margin-bottom:10px;color:#667eea">📄 Gunakan Template: ${templateType}</h3>
+                    <p style="color:#64748b;margin-bottom:12px;">Template akan menambahkan struktur dasar ke proyek Anda. Anda dapat mengubahnya kapan saja.</p>
+                    <div style="display:flex;gap:8px;justify-content:flex-end;">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Batal</button>
+                        <button id="btnApplyTemplate" class="btn btn-primary">Terapkan</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+            modal.querySelector('#btnApplyTemplate').onclick = () => {
+                try {
+                    const key = 'smartMosque.templates';
+                    const state = JSON.parse(localStorage.getItem(key)||'{}');
+                    state.lastUsed = templateType; state.history = state.history||[]; state.history.push({templateType, at: Date.now()});
+                    localStorage.setItem(key, JSON.stringify(state));
+                    showNotification(`✅ Template ${templateType} diterapkan.`, 'success');
+                } catch(e){ showNotification('❌ Gagal menerapkan template', 'error'); }
+                modal.remove();
+            };
         }
 
         function previewTemplate(templateType) {
-            showNotification(`👁️ Membuka preview template ${templateType}...`, 'info');
+            const previews = {
+                survey: `Judul: Kuesioner Kesiapan Digital Masjid\n- Pertanyaan 1: Ketersediaan data jamaah\n- Pertanyaan 2: Sarana pendukung (WiFi/CCTV)\n- Pertanyaan 3: Komunikasi (WA/Email)` ,
+                canvas: `Business Model Canvas (Masjid)\n- Segmen: Jamaah, Pengurus, Donatur\n- Nilai: Transparansi, Kemudahan Akses, Kolaborasi\n- Kanal: Papan Pengumuman, WhatsApp, Website`,
+                technical: `Checklist Teknis\n[ ] Struktur folder rapi\n[ ] Backup rutin\n[ ] Otentikasi akses data`,
+                documentation: `Dokumentasi Inti:\n- TEAM-DOCUMENTATION.md\n- TECHNICAL-DOCUMENTATION.md\n- USER-GUIDE.md\n- README.md`
+            };
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width:760px;">
+                    <h3 style="margin-bottom:10px;color:#667eea">👁️ Preview Template: ${templateType}</h3>
+                    <pre style="background:#0f172a;color:#e2e8f0;padding:12px;border-radius:8px;white-space:pre-wrap;">${(previews[templateType]||'Tidak ada preview').replace(/</g,'&lt;')}</pre>
+                    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px;">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Tutup</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
         }
 
         function downloadTemplate(templateType) {
-            showNotification(`💾 Mengunduh template ${templateType}...`, 'info');
-            setTimeout(() => {
-                showNotification(`✅ Template ${templateType} berhasil diunduh!`, 'success');
-            }, 2000);
+            const nameMap = { survey: 'survey-template.csv', canvas: 'business-model-canvas.md', technical: 'technical-checklist.md', documentation: 'documentation-kit.md' };
+            let content = '';
+            let mime = 'text/plain;charset=utf-8';
+            if (templateType === 'survey') {
+                content = 'section,question,type\nProfil,Ketersediaan data jamaah,select(Kosong;Manual;Digital)\nFasilitas,Akses internet,select(Tidak Ada;Ada)\nLayanan,Saluran komunikasi,select(WhatsApp;Email;Papan Pengumuman)';
+                mime = 'text/csv;charset=utf-8';
+            } else if (templateType === 'canvas') {
+                content = '# Business Model Canvas (Masjid)\n\n## Segmen Pelanggan\n- Jamaah\n- Pengurus\n- Donatur\n\n## Proposisi Nilai\n- Transparansi keuangan\n- Kemudahan akses informasi\n- Kolaborasi kegiatan\n';
+            } else if (templateType === 'technical') {
+                content = '# Checklist Teknis\n- [ ] Struktur folder rapi\n- [ ] Backup rutin\n- [ ] Otentikasi akses data\n- [ ] Kontrol versi (Git)\n';
+            } else if (templateType === 'documentation') {
+                content = '# Documentation Kit\n\nLihat berkas inti di repositori:\n- docs/Framework.md\n- TEAM-DOCUMENTATION.md\n- TECHNICAL-DOCUMENTATION.md\n- USER-GUIDE.md\n- README.md\n';
+            }
+            downloadBlob(nameMap[templateType] || `template-${templateType}.txt`, content, mime);
+            showNotification(`✅ Template ${templateType} diunduh.`, 'success');
         }
 
         // Quick Setup Wizard (multi-step modal)
@@ -1306,58 +1409,351 @@
 
         // Other Functions
         function viewProgress() {
-            showNotification(`📈 Menampilkan detail progress...`, 'info');
+            const { pengurus, jamaah } = getSurveyCounts();
+            const totalTarget = { pengurus: 10, jamaah: 75 };
+            const pct1 = Math.min(100, Math.round((pengurus/totalTarget.pengurus)*100));
+            const pct2 = Math.min(100, Math.round((jamaah/totalTarget.jamaah)*100));
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width:720px;">
+                    <h3 style="margin-bottom:10px;color:#667eea">📈 Detail Progress</h3>
+                    <div style="display:grid;gap:12px;">
+                        <div>
+                            <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><strong>Pengurus</strong><span>${pengurus}/${totalTarget.pengurus}</span></div>
+                            <div style="height:10px;background:#e5e7eb;border-radius:6px;overflow:hidden"><div style="width:${pct1}%;height:100%;background:#667eea"></div></div>
+                        </div>
+                        <div>
+                            <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><strong>Jamaah</strong><span>${jamaah}/${totalTarget.jamaah}</span></div>
+                            <div style="height:10px;background:#e5e7eb;border-radius:6px;overflow:hidden"><div style="width:${pct2}%;height:100%;background:#34d399"></div></div>
+                        </div>
+                    </div>
+                    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Tutup</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
         }
 
         function exportData() {
-            showNotification(`💾 Mengeksport data...`, 'info');
-            setTimeout(() => {
-                showNotification(`✅ Data berhasil dieksport!`, 'success');
-            }, 2000);
+            try {
+                const data = {
+                    exportedAt: new Date().toISOString(),
+                    quickSetup: loadQSState(),
+                    surveys: JSON.parse(localStorage.getItem('smartMosque.surveys')||'[]'),
+                    settings: JSON.parse(localStorage.getItem('smartMosque.settings')||'{}'),
+                    integrations: JSON.parse(localStorage.getItem('smartMosque.integrations')||'{}'),
+                    api: JSON.parse(localStorage.getItem('smartMosque.api')||'{}'),
+                    team: JSON.parse(localStorage.getItem('smartMosque.team')||'[]')
+                };
+                const pretty = JSON.stringify(data, null, 2);
+                downloadBlob(`smart-mosque-backup-${Date.now()}.json`, pretty, 'application/json;charset=utf-8');
+                showNotification('✅ Data berhasil diekspor (JSON).', 'success');
+            } catch (e) {
+                console.error(e);
+                showNotification('❌ Gagal mengekspor data.', 'error');
+            }
         }
 
         function importData() {
-            showNotification(`📥 Membuka dialog import...`, 'info');
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width:560px;">
+                    <h3 style="margin-bottom:10px;color:#667eea">📥 Import Data</h3>
+                    <p style="color:#64748b;margin-bottom:10px;">Pilih berkas backup JSON hasil eksport sebelumnya.</p>
+                    <input id="importFile" type="file" accept="application/json,.json" />
+                    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Batal</button>
+                        <button id="btnDoImport" class="btn btn-primary" disabled>Import</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+            const fileInput = modal.querySelector('#importFile');
+            const btn = modal.querySelector('#btnDoImport');
+            fileInput.addEventListener('change', () => { btn.disabled = !fileInput.files.length; });
+            btn.addEventListener('click', () => {
+                if (!fileInput.files.length) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                    try {
+                        const obj = JSON.parse(reader.result);
+                        if (obj.quickSetup) localStorage.setItem(QS_STORAGE_KEY, JSON.stringify(obj.quickSetup));
+                        if (obj.surveys) localStorage.setItem('smartMosque.surveys', JSON.stringify(obj.surveys));
+                        if (obj.settings) localStorage.setItem('smartMosque.settings', JSON.stringify(obj.settings));
+                        if (obj.integrations) localStorage.setItem('smartMosque.integrations', JSON.stringify(obj.integrations));
+                        if (obj.api) localStorage.setItem('smartMosque.api', JSON.stringify(obj.api));
+                        if (obj.team) localStorage.setItem('smartMosque.team', JSON.stringify(obj.team));
+                        showNotification('✅ Data berhasil diimport.', 'success');
+                        modal.remove();
+                        applySettings();
+                        updateSurveyUI();
+                        renderIntegrationStatus();
+                    } catch(e){
+                        console.error(e);
+                        showNotification('❌ Format berkas tidak valid.', 'error');
+                    }
+                };
+                reader.readAsText(fileInput.files[0]);
+            });
         }
 
         function connectIntegration(service) {
-            showNotification(`🔗 Menghubungkan dengan ${service}...`, 'info');
-            setTimeout(() => {
-                showNotification(`✅ ${service} berhasil terhubung!`, 'success');
-            }, 2000);
+            const configs = {
+                'Google Sheets': { fields: [{key:'sheetId', label:'Sheet ID', type:'text', placeholder:'1AbC...'}] },
+                'Email': { fields: [{key:'email', label:'Email admin', type:'email', placeholder:'admin@masjid.or.id'}] },
+                'WhatsApp': { fields: [{key:'number', label:'Nomor/Token', type:'text', placeholder:'+62xxxx atau Token API'}] },
+                'Cloud Backup': { fields: [{key:'provider', label:'Penyedia', type:'select', options:['Google Drive','Dropbox','OneDrive']}] },
+                'Mobile App': { fields: [{key:'appId', label:'App ID', type:'text', placeholder:'com.masjid.app'}] }
+            };
+            const cfg = configs[service] || { fields: [] };
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width:560px;">
+                    <h3 style="margin-bottom:10px;color:#667eea">🔗 Integrasi: ${service}</h3>
+                    <form id="integrationForm" style="display:grid;gap:12px;">
+                        ${cfg.fields.map(f => {
+                            if (f.type==='select'){
+                                return `<div><label style='font-weight:600;display:block;margin-bottom:6px;'>${f.label}</label>
+                                    <select name="${f.key}" style='width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;'>
+                                        ${f.options.map(o=>`<option value='${o}'>${o}</option>`).join('')}
+                                    </select></div>`;
+                            }
+                            return `<div><label style='font-weight:600;display:block;margin-bottom:6px;'>${f.label}</label>
+                                <input type="${f.type||'text'}" name="${f.key}" placeholder="${f.placeholder||''}" style='width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;'/></div>`
+                        }).join('')}
+                        <div style="display:flex;justify-content:flex-end;gap:8px;">
+                            <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Batal</button>
+                            <button type="submit" class="btn btn-primary">Simpan</button>
+                        </div>
+                    </form>
+                </div>`;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+            modal.querySelector('#integrationForm').addEventListener('submit', e => {
+                e.preventDefault();
+                const data = {}; new FormData(e.currentTarget).forEach((v,k)=>data[k]=v);
+                try {
+                    const key = 'smartMosque.integrations';
+                    const state = JSON.parse(localStorage.getItem(key)||'{}');
+                    state[service] = { connected: true, config: data, at: Date.now() };
+                    localStorage.setItem(key, JSON.stringify(state));
+                    showNotification(`✅ ${service} terhubung.`, 'success');
+                    modal.remove();
+                    renderIntegrationStatus();
+                } catch(err){ showNotification('❌ Gagal menyimpan integrasi', 'error'); }
+            });
         }
 
         function inviteTeamMember() {
-            showNotification(`➕ Membuka dialog undangan...`, 'info');
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width:560px;">
+                    <h3 style="margin-bottom:10px;color:#667eea">➕ Undang Anggota</h3>
+                    <form id="inviteForm" style="display:grid;gap:12px;">
+                        <div><label style='font-weight:600;display:block;margin-bottom:6px;'>Nama</label><input name="name" required style='width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;'/></div>
+                        <div><label style='font-weight:600;display:block;margin-bottom:6px;'>Email/WhatsApp</label><input name="contact" required style='width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;'/></div>
+                        <div><label style='font-weight:600;display:block;margin-bottom:6px;'>Peran</label><select name="role" style='width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;'><option>Pengurus</option><option>Relawan</option><option>IT Support</option></select></div>
+                        <div style="display:flex;justify-content:flex-end;gap:8px;">
+                            <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Batal</button>
+                            <button type="submit" class="btn btn-primary">Kirim Undangan</button>
+                        </div>
+                    </form>
+                </div>`;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+            modal.querySelector('#inviteForm').addEventListener('submit', e => {
+                e.preventDefault();
+                const data = {}; new FormData(e.currentTarget).forEach((v,k)=>data[k]=v);
+                const key = 'smartMosque.team';
+                const arr = JSON.parse(localStorage.getItem(key)||'[]');
+                arr.push({ ...data, invitedAt: Date.now() });
+                localStorage.setItem(key, JSON.stringify(arr));
+                showNotification('✅ Undangan terkirim.', 'success');
+                modal.remove();
+            });
         }
 
         function resetPlatform() {
             if (confirm('Apakah Anda yakin ingin mereset platform? Semua data akan hilang.')) {
-                showNotification(`🔄 Mereset platform...`, 'info');
-                setTimeout(() => {
-                    showNotification(`✅ Platform berhasil direset!`, 'success');
-                }, 2000);
+                try {
+                    [QS_STORAGE_KEY,'smartMosque.surveys','smartMosque.settings','smartMosque.integrations','smartMosque.api','smartMosque.team','smartMosque.templates'].forEach(k=>localStorage.removeItem(k));
+                    showNotification('🔄 Mereset platform...', 'info');
+                    setTimeout(()=>{ location.reload(); }, 800);
+                } catch(e){ showNotification('❌ Gagal mereset.', 'error'); }
             }
         }
 
         function saveSettings() {
-            showNotification(`💾 Menyimpan pengaturan...`, 'info');
-            setTimeout(() => {
-                showNotification(`✅ Pengaturan berhasil disimpan!`, 'success');
-            }, 1500);
+            // Ambil 3 toggle di section Settings (urut: autosave, email, dark)
+            const settingsEl = document.getElementById('settings');
+            if (!settingsEl) return showNotification('❌ Tidak menemukan form Settings', 'error');
+            const toggles = settingsEl.querySelectorAll('input[type="checkbox"]');
+            const autosave = toggles[0]?.checked || false;
+            const emailNotif = toggles[1]?.checked || false;
+            const darkMode = toggles[2]?.checked || false;
+            const settings = { autosave, emailNotif, darkMode };
+            localStorage.setItem('smartMosque.settings', JSON.stringify(settings));
+            applySettings();
+            showNotification('✅ Pengaturan disimpan.', 'success');
         }
 
         function openAPIManager() {
-            showNotification(`🔧 Membuka API Manager...`, 'info');
+            const saved = JSON.parse(localStorage.getItem('smartMosque.api')||'{}');
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width:560px;">
+                    <h3 style="margin-bottom:10px;color:#667eea">🔧 API Manager</h3>
+                    <form id="apiForm" style="display:grid;gap:12px;">
+                        <div><label style='font-weight:600;display:block;margin-bottom:6px;'>Base URL</label><input name="baseUrl" placeholder="https://api.example.com" value="${saved.baseUrl||''}" style='width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;'/></div>
+                        <div><label style='font-weight:600;display:block;margin-bottom:6px;'>API Key</label><input name="apiKey" type="password" value="${saved.apiKey||''}" style='width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;'/></div>
+                        <div style="display:flex;justify-content:flex-end;gap:8px;">
+                            <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">Tutup</button>
+                            <button type="submit" class="btn btn-primary">Simpan</button>
+                        </div>
+                    </form>
+                </div>`;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+            modal.querySelector('#apiForm').addEventListener('submit', e => {
+                e.preventDefault();
+                const data = {}; new FormData(e.currentTarget).forEach((v,k)=>data[k]=v);
+                localStorage.setItem('smartMosque.api', JSON.stringify(data));
+                showNotification('✅ API settings disimpan.', 'success');
+                modal.remove();
+            });
         }
 
         function previewDashboard() {
-            showNotification(`👁️ Membuka preview dashboard...`, 'info');
+            const { pengurus, jamaah } = getSurveyCounts();
+            const integrations = JSON.parse(localStorage.getItem('smartMosque.integrations')||'{}');
+            const connected = Object.values(integrations).filter(x=>x && x.connected).length;
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width:820px;">
+                    <h3 style="margin-bottom:10px;color:#667eea">👁️ Preview Dashboard</h3>
+                    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:12px;">
+                        <div class="card"><div style='color:#64748b'>Respon Pengurus</div><div style='font-size:1.6rem;font-weight:700'>${pengurus}</div></div>
+                        <div class="card"><div style='color:#64748b'>Respon Jamaah</div><div style='font-size:1.6rem;font-weight:700'>${jamaah}</div></div>
+                        <div class="card"><div style='color:#64748b'>Integrasi Aktif</div><div style='font-size:1.6rem;font-weight:700'>${connected}</div></div>
+                    </div>
+                    <div class="card">
+                        <div style="margin-bottom:6px;font-weight:600;color:#334155">Progress Terkini</div>
+                        <div style="height:10px;background:#e5e7eb;border-radius:6px;overflow:hidden"><div style="width:${Math.min(100, (pengurus/10*40)+(jamaah/75*60))}%;height:100%;background:#667eea"></div></div>
+                    </div>
+                    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Tutup</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
         }
 
         function viewSurveyStats() {
-            showNotification(`📈 Menampilkan statistik survey...`, 'info');
+            const { pengurus, jamaah } = getSurveyCounts();
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width:640px;">
+                    <h3 style="margin-bottom:10px;color:#667eea">📈 Statistik Survey</h3>
+                    <ul style="margin-left:18px;color:#475569;">
+                        <li>Total respon Pengurus: <strong>${pengurus}</strong></li>
+                        <li>Total respon Jamaah: <strong>${jamaah}</strong></li>
+                    </ul>
+                    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Tutup</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
         }
+
+        // Helpers
+        function downloadBlob(filename, content, mime){
+            const blob = new Blob([content], { type: mime||'application/octet-stream' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(()=> URL.revokeObjectURL(url), 2000);
+        }
+        function getSurveyCounts(){
+            const arr = JSON.parse(localStorage.getItem('smartMosque.surveys')||'[]');
+            return {
+                pengurus: arr.filter(x=>x.type==='pengurus').length,
+                jamaah: arr.filter(x=>x.type==='jamaah').length
+            };
+        }
+        function updateSurveyUI(){
+            const { pengurus, jamaah } = getSurveyCounts();
+            const pengurusEl = document.getElementById('pengurusCount');
+            const jamaahEl = document.getElementById('jamaahCount');
+            const pengurusBar = document.getElementById('pengurusProgress');
+            const jamaahBar = document.getElementById('jamaahProgress');
+            if (pengurusEl) pengurusEl.textContent = `${pengurus}/10 responden`;
+            if (jamaahEl) jamaahEl.textContent = `${jamaah}/75 responden`;
+            if (pengurusBar) pengurusBar.style.width = `${Math.min(100,(pengurus/10)*100)}%`;
+            if (jamaahBar) jamaahBar.style.width = `${Math.min(100,(jamaah/75)*100)}%`;
+            const overallProgress = document.getElementById('overallProgress');
+            if (overallProgress){
+                const pct = Math.min(100, Math.round((pengurus/10*40)+(jamaah/75*60)));
+                overallProgress.textContent = `${pct}%`;
+                const ring = document.querySelector('.progress-ring');
+                if (ring){ const degree = (pct/100)*360; ring.style.background = `conic-gradient(#667eea 0deg ${degree}deg, #e2e8f0 ${degree}deg 360deg)`; }
+            }
+        }
+        function applySettings(){
+            const settings = JSON.parse(localStorage.getItem('smartMosque.settings')||'{}');
+            document.body.classList.toggle('dark-mode', !!settings.darkMode);
+            // sync toggles if available
+            const settingsEl = document.getElementById('settings');
+            if (settingsEl){
+                const toggles = settingsEl.querySelectorAll('input[type="checkbox"]');
+                if (toggles[0]) toggles[0].checked = !!settings.autosave;
+                if (toggles[1]) toggles[1].checked = !!settings.emailNotif;
+                if (toggles[2]) toggles[2].checked = !!settings.darkMode;
+            }
+        }
+        function renderIntegrationStatus(){
+            const state = JSON.parse(localStorage.getItem('smartMosque.integrations')||'{}');
+            document.querySelectorAll('button').forEach(btn=>{
+                const txt = btn.textContent || '';
+                if (/Connect|Setup|Manage/.test(txt)){
+                    // Try infer service by nearby heading
+                    const card = btn.closest('.card');
+                    if (!card) return;
+                    let service = null;
+                    if (card.textContent.includes('Google Sheets')) service = 'Google Sheets';
+                    else if (card.textContent.includes('Email')) service = 'Email';
+                    else if (card.textContent.includes('WhatsApp')) service = 'WhatsApp';
+                    else if (card.textContent.includes('API Manager')) service = null; // handled separately
+                    else if (card.textContent.includes('Cloud Backup')) service = 'Cloud Backup';
+                    else if (card.textContent.includes('Mobile App')) service = 'Mobile App';
+                    if (service && state[service]?.connected){
+                        btn.textContent = '✅ Connected';
+                        btn.disabled = true;
+                    }
+                }
+            });
+        }
+        // minimal dark mode style
+        (function ensureDarkModeStyle(){
+            if (document.getElementById('darkModeStyle')) return;
+            const style = document.createElement('style');
+            style.id = 'darkModeStyle';
+            style.textContent = `
+                body.dark-mode { background:#0b1220; color:#e2e8f0; }
+                body.dark-mode .sidebar { background:#0f172a; color:#e2e8f0; }
+                body.dark-mode .card { background:#111827; border-color:#1f2937; }
+                body.dark-mode .nav-item.active { background:#1f2937; }
+            `;
+            document.head.appendChild(style);
+        })();
 
         // Initialize Navigation
         function handleHashChange() {
@@ -1392,6 +1788,11 @@
             handleHashChange();
             // Listen to hash changes (back/forward buttons)
             window.addEventListener('hashchange', handleHashChange);
+
+            // Apply saved settings and UI state
+            applySettings();
+            updateSurveyUI();
+            renderIntegrationStatus();
 
             // Auto-update data every 30 seconds
             setInterval(function() {
