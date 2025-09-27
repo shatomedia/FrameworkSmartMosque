@@ -1057,12 +1057,215 @@
             }, 2000);
         }
 
-        // Quick Setup Wizard
+        // Quick Setup Wizard (multi-step modal)
+        const QS_STORAGE_KEY = 'smartMosque.quickSetup';
+        const QS_STEPS = [
+            { id: 'profile', title: 'Profil Masjid', required: ['mosqueName'], fields: [
+                { key: 'mosqueName', label: 'Nama Masjid', type: 'text', placeholder: 'Masjid Al-Ikhlas', required: true },
+                { key: 'address', label: 'Alamat', type: 'text', placeholder: 'Jl. Contoh No. 1' },
+                { key: 'city', label: 'Kota/Kabupaten', type: 'text', placeholder: 'Kota Anda' },
+                { key: 'contact', label: 'Kontak (WhatsApp/Email)', type: 'text', placeholder: '08xxxxxxxxxx / email@domain.com' }
+            ]},
+            { id: 'services', title: 'Layanan & Fasilitas', fields: [
+                { key: 'services', label: 'Layanan yang Aktif', type: 'checkbox-group', options: ['Kajian Rutin','TPQ/TPA','Zakat/Infaq','Ramadhan','Sosial'], value: [] },
+                { key: 'facilities', label: 'Fasilitas', type: 'checkbox-group', options: ['WiFi','Projector','Sound System','CCTV'], value: [] }
+            ]},
+            { id: 'team', title: 'Tim & Peran', fields: [
+                { key: 'leadName', label: 'Ketua Takmir', type: 'text', placeholder: 'Nama Ketua' },
+                { key: 'itSupport', label: 'Kontak IT Support', type: 'text', placeholder: 'Nama/No. HP' }
+            ]},
+            { id: 'tools', title: 'Tools & Integrasi', fields: [
+                { key: 'useSheets', label: 'Integrasi Google Sheets', type: 'switch' },
+                { key: 'useEmail', label: 'Notifikasi Email', type: 'switch' },
+                { key: 'useWhatsApp', label: 'Notifikasi WhatsApp', type: 'switch' }
+            ]},
+            { id: 'confirm', title: 'Konfirmasi', fields: [] }
+        ];
+
+        function loadQSState() {
+            try { return JSON.parse(localStorage.getItem(QS_STORAGE_KEY)) || {}; } catch(e) { return {}; }
+        }
+        function saveQSState(state) {
+            localStorage.setItem(QS_STORAGE_KEY, JSON.stringify(state));
+        }
+
         function startQuickSetup() {
-            showNotification(`🚀 Memulai Quick Setup Wizard...`, 'info');
-            setTimeout(() => {
-                showNotification(`✅ Quick Setup berhasil dimulai!`, 'success');
-            }, 1500);
+            const state = loadQSState();
+            state.step = state.step || 0;
+            saveQSState(state);
+            openQuickSetupWizard(state.step);
+        }
+
+        function openQuickSetupWizard(stepIndex = 0) {
+            // Build modal
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 760px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                        <h3 style="margin:0;color:#667eea;">🚀 Quick Setup Wizard</h3>
+                        <button id="qsClose" title="Tutup" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#64748b">×</button>
+                    </div>
+                    <div id="qsProgress" style="height:6px;background:#e5e7eb;border-radius:6px;margin-bottom:16px;overflow:hidden;">
+                        <div id="qsProgressBar" style="height:100%;width:0;background:#667eea;"></div>
+                    </div>
+                    <div id="qsStepsNav" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;"></div>
+                    <div id="qsBody"></div>
+                    <div style="display:flex;justify-content:space-between;margin-top:16px;">
+                        <button id="qsBack" class="btn btn-secondary">⬅️ Kembali</button>
+                        <div style="display:flex;gap:8px;">
+                            <button id="qsSaveExit" class="btn btn-secondary">💾 Simpan & Tutup</button>
+                            <button id="qsNext" class="btn btn-primary">Lanjut ➡️</button>
+                        </div>
+                    </div>
+                </div>`;
+            document.body.appendChild(modal);
+
+            const state = loadQSState();
+            renderQSStep(stepIndex);
+
+            function renderQSStep(i) {
+                const total = QS_STEPS.length;
+                state.step = Math.max(0, Math.min(i, total-1));
+                saveQSState(state);
+
+                // Progress
+                const pct = Math.round(((state.step) / (total-1)) * 100);
+                modal.querySelector('#qsProgressBar').style.width = pct + '%';
+
+                // Steps nav
+                const stepsNav = modal.querySelector('#qsStepsNav');
+                stepsNav.innerHTML = QS_STEPS.map((s, idx) => {
+                    const active = idx === state.step ? 'font-weight:700;color:#111827;border-color:#667eea;background:#eef2ff;' : 'color:#6b7280;border-color:#e5e7eb;';
+                    return `<div style="border:1px solid;border-radius:999px;padding:4px 10px;${active}">${idx+1}. ${s.title}</div>`;
+                }).join('');
+
+                // Body
+                const body = modal.querySelector('#qsBody');
+                const step = QS_STEPS[state.step];
+                if (step.id !== 'confirm') {
+                    body.innerHTML = `<div style="display:grid;gap:12px;">
+                        ${step.fields.map(renderQSField).join('')}
+                    </div>`;
+                    // hydrate values
+                    step.fields.forEach(f => applyQSValue(f));
+                } else {
+                    const saved = loadQSState();
+                    body.innerHTML = `
+                        <div style="display:grid;gap:12px;">
+                            <div style="padding:12px;background:#f8fafc;border-radius:8px;border:1px solid #e5e7eb;">
+                                <strong>Ringkasan:</strong>
+                                <div>Nama Masjid: ${saved.mosqueName || '-'}</div>
+                                <div>Kota: ${saved.city || '-'}</div>
+                                <div>Kontak: ${saved.contact || '-'}</div>
+                                <div>Layanan: ${(saved.services||[]).join(', ') || '-'}</div>
+                                <div>Fasilitas: ${(saved.facilities||[]).join(', ') || '-'}</div>
+                                <div>Ketua: ${saved.leadName || '-'}</div>
+                                <div>IT Support: ${saved.itSupport || '-'}</div>
+                                <div>Integrasi: ${['useSheets','useEmail','useWhatsApp'].filter(k=>saved[k]).map(k=>k.replace('use','')).join(', ') || '-'}</div>
+                            </div>
+                            <div style="color:#64748b;">Klik "Selesai" untuk menerapkan perubahan dan melanjutkan.</div>
+                        </div>`;
+                }
+
+                // Buttons
+                const btnBack = modal.querySelector('#qsBack');
+                const btnNext = modal.querySelector('#qsNext');
+                btnBack.disabled = state.step === 0;
+                btnBack.onclick = () => renderQSStep(state.step - 1);
+                btnNext.textContent = state.step === total-1 ? 'Selesai ✅' : 'Lanjut ➡️';
+                btnNext.onclick = () => {
+                    if (!validateQSStep()) return;
+                    if (state.step === total-1) return finishQS();
+                    renderQSStep(state.step + 1);
+                };
+                modal.querySelector('#qsSaveExit').onclick = () => { showNotification('💾 Quick Setup disimpan', 'success'); modal.remove(); };
+                modal.querySelector('#qsClose').onclick = () => modal.remove();
+                modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+                window.addEventListener('keydown', escClose);
+                function escClose(e){ if(e.key==='Escape'){ modal.remove(); window.removeEventListener('keydown', escClose);} }
+
+                function validateQSStep(){
+                    const step = QS_STEPS[state.step];
+                    if (!step.required || step.required.length===0) return true;
+                    for (const key of step.required){
+                        const el = body.querySelector(`[data-key="${key}"]`);
+                        const val = (el && (el.value || el.checked || (Array.isArray(el.value) && el.value.length))) ? el.value : el?.value;
+                        if (!el || !el.value || String(el.value).trim()===''){
+                            showNotification('⚠️ Mohon lengkapi field wajib: ' + (key==='mosqueName'?'Nama Masjid':key), 'error');
+                            el && el.focus();
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            }
+
+            function renderQSField(f){
+                const saved = loadQSState();
+                if (f.type === 'checkbox-group'){
+                    const values = saved[f.key] || [];
+                    return `<div>
+                        <label style="display:block;font-weight:600;margin-bottom:6px;">${f.label}</label>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                            ${f.options.map(opt => {
+                                const id = `qs_${f.key}_${opt}`;
+                                const checked = values.includes(opt) ? 'checked' : '';
+                                return `<label for="${id}" style="display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid #e5e7eb;border-radius:999px;cursor:pointer;">
+                                    <input id="${id}" type="checkbox" data-key="${f.key}" value="${opt}" ${checked} /> ${opt}
+                                </label>`;
+                            }).join('')}
+                        </div>
+                    </div>`;
+                }
+                if (f.type === 'switch'){
+                    const checked = saved[f.key] ? 'checked' : '';
+                    return `<label style="display:flex;justify-content:space-between;align-items:center;padding:10px;border:1px solid #e5e7eb;border-radius:8px;">
+                        <span>${f.label}</span>
+                        <input type="checkbox" role="switch" data-key="${f.key}" ${checked} />
+                    </label>`;
+                }
+                // text/number
+                const val = saved[f.key] || '';
+                return `<div>
+                    <label style="display:block;font-weight:600;margin-bottom:6px;" for="qs_${f.key}">${f.label}${f.required?' *':''}</label>
+                    <input id="qs_${f.key}" data-key="${f.key}" type="${f.type||'text'}" placeholder="${f.placeholder||''}" value="${val}"
+                        style="width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;" ${f.required?'required':''} />
+                </div>`;
+            }
+
+            function applyQSValue(f){
+                const state = loadQSState();
+                if (f.type === 'checkbox-group'){
+                    const checkboxes = modal.querySelectorAll(`input[data-key="${f.key}"]`);
+                    checkboxes.forEach(cb => {
+                        cb.addEventListener('change', () => {
+                            const all = Array.from(modal.querySelectorAll(`input[data-key="${f.key}"]`)).filter(x=>x.checked).map(x=>x.value);
+                            state[f.key] = all; saveQSState(state);
+                        });
+                    });
+                    return;
+                }
+                const el = modal.querySelector(`[data-key="${f.key}"]`);
+                if (!el) return;
+                el.addEventListener('input', () => { state[f.key] = el.type==='checkbox' ? el.checked : el.value; saveQSState(state); });
+                el.addEventListener('change', () => { state[f.key] = el.type==='checkbox' ? el.checked : el.value; saveQSState(state); });
+            }
+
+            function finishQS(){
+                const state = loadQSState();
+                state.completed = true; saveQSState(state);
+                // Update simple UI hints
+                const overall = document.getElementById('overallProgress');
+                if (overall) { overall.textContent = '70%'; }
+                const progressRing = document.querySelector('.progress-ring');
+                if (progressRing) { const degree = (70/100)*360; progressRing.style.background = `conic-gradient(#667eea 0deg ${degree}deg, #e2e8f0 ${degree}deg 360deg)`; }
+                showNotification('✅ Quick Setup selesai! Data dasar tersimpan.', 'success');
+                modal.remove();
+                // Arahkan ke Templates untuk langkah lanjut
+                location.hash = 'templates';
+                showSection('templates');
+            }
         }
 
         // Progress Update Function
