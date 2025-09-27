@@ -506,35 +506,35 @@
             <!-- Sidebar Navigation -->
             <div class="sidebar">
                 <h3 style="margin-bottom: 20px; color: #2c3e50;">📋 Framework Modules</h3>
-                <div class="nav-item active" data-section="process-guide">
+                <div class="nav-item active" data-section="process-guide" role="button" tabindex="0" onclick="location.hash='process-guide'; showSection('process-guide')">
                     <span>🗺️</span>
                     <span>Panduan Proses</span>
                 </div>
-                <div class="nav-item" data-section="templates">
+                <div class="nav-item" data-section="templates" role="button" tabindex="0" onclick="location.hash='templates'; showSection('templates')">
                     <span>📄</span>
                     <span>Template & Tools</span>
                 </div>
-                <div class="nav-item" data-section="survey">
+                <div class="nav-item" data-section="survey" role="button" tabindex="0" onclick="location.hash='survey'; showSection('survey')">
                     <span>📊</span>
                     <span>Survey Interaktif</span>
                 </div>
-                <div class="nav-item" data-section="analysis">
+                <div class="nav-item" data-section="analysis" role="button" tabindex="0" onclick="location.hash='analysis'; showSection('analysis')">
                     <span>📈</span>
                     <span>Analisis & Insight</span>
                 </div>
-                <div class="nav-item" data-section="collaboration">
+                <div class="nav-item" data-section="collaboration" role="button" tabindex="0" onclick="location.hash='collaboration'; showSection('collaboration')">
                     <span>👥</span>
                     <span>Kolaborasi Tim</span>
                 </div>
-                <div class="nav-item" data-section="integrations">
+                <div class="nav-item" data-section="integrations" role="button" tabindex="0" onclick="location.hash='integrations'; showSection('integrations')">
                     <span>🔗</span>
                     <span>Integrasi Tools</span>
                 </div>
-                <div class="nav-item" data-section="dashboard">
+                <div class="nav-item" data-section="dashboard" role="button" tabindex="0" onclick="location.hash='dashboard'; showSection('dashboard')">
                     <span>📊</span>
                     <span>Dashboard Visual</span>
                 </div>
-                <div class="nav-item" data-section="settings">
+                <div class="nav-item" data-section="settings" role="button" tabindex="0" onclick="location.hash='settings'; showSection('settings')">
                     <span>⚙️</span>
                     <span>Settings & Reset</span>
                 </div>
@@ -1155,6 +1155,13 @@
         }
 
         // Initialize Navigation
+        function handleHashChange() {
+            const hash = window.location.hash.replace('#','').trim();
+            const valid = ['process-guide','templates','survey','analysis','collaboration','integrations','dashboard','settings'];
+            const target = valid.includes(hash) ? hash : 'process-guide';
+            showSection(target);
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             // Setup navigation click handlers
             document.querySelectorAll('.nav-item').forEach(item => {
@@ -1166,6 +1173,11 @@
                 });
             });
 
+            // Initial route
+            handleHashChange();
+            // Listen to hash changes (back/forward buttons)
+            window.addEventListener('hashchange', handleHashChange);
+
             // Auto-update data every 30 seconds
             setInterval(function() {
                 const autoSaveStatus = document.getElementById('autoSaveStatus');
@@ -1175,10 +1187,13 @@
                 }
             }, 30000);
 
-            // Welcome notification
-            setTimeout(() => {
-                showNotification('🕌 Selamat datang di Smart Mosque Platform!', 'success');
-            }, 1000);
+            // Welcome notification (only on first load of home section)
+            if (!window.sessionStorage.getItem('welcomeShown')) {
+                setTimeout(() => {
+                    showNotification('🕌 Selamat datang di Smart Mosque Platform!', 'success');
+                }, 800);
+                window.sessionStorage.setItem('welcomeShown', '1');
+            }
         });
     </script>
 </body>
